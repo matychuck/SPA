@@ -48,7 +48,7 @@ namespace SPA2.Interfaces
 
         TNODE_SET GetParentedBy(TNODE node);
 
-        TNODE GetParentStar(TNODE node);
+        TNODE_SET GetParentStar(TNODE node);
 
         TNODE_SET GetParentedStarBy(TNODE node);
 
@@ -56,7 +56,7 @@ namespace SPA2.Interfaces
 
         TNODE GetFollows(TNODE node);
 
-        TNODE GetFollowsStar(TNODE node);
+        TNODE_SET GetFollowsStar(TNODE node);
 
         TNODE_SET GetFollowedBy(TNODE node);
 

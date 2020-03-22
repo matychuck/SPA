@@ -44,7 +44,7 @@ namespace SPA2.AST
             throw new NotImplementedException();
         }
 
-        public TNODE GetFollowsStar(TNODE node)
+        public TNODE_SET GetFollowsStar(TNODE node)
         {
             throw new NotImplementedException();
         }
@@ -78,7 +78,7 @@ namespace SPA2.AST
             throw new NotImplementedException();
         }
 
-        public TNODE GetParentStar(TNODE node)
+        public TNODE_SET GetParentStar(TNODE node)
         {
             throw new NotImplementedException();
         }
