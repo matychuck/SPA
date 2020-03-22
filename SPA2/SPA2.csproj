@@ -43,6 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AST\AST.cs" />
+    <Compile Include="AST\ATTR.cs" />
+    <Compile Include="AST\LINK.cs" />
+    <Compile Include="AST\TNODE.cs" />
+    <Compile Include="AST\TNODE_SET.cs" />
+    <Compile Include="Enums\EntityTypeEnum.cs" />
+    <Compile Include="Enums\LinkTypeEnum.cs" />
+    <Compile Include="Interfaces\IAST.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
