@@ -51,11 +51,18 @@
     <Compile Include="Enums\EntityTypeEnum.cs" />
     <Compile Include="Enums\LinkTypeEnum.cs" />
     <Compile Include="Interfaces\IAST.cs" />
+    <Compile Include="Interfaces\IProcTable.cs" />
+    <Compile Include="Interfaces\IVarTable.cs" />
+    <Compile Include="ProcTable\ProcRefs.cs" />
+    <Compile Include="ProcTable\ProcTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VarTable\VarRefs.cs" />
+    <Compile Include="VarTable\VarTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
