@@ -11,10 +11,13 @@ namespace SPA2.AST
     {
         public ATTR Attr { get; set; }
         public List<LINK> Links { get; set; }
+        public List<LINK> PrevLinks { get; set; }
         public EntityTypeEnum EntityTypeEnum { get; set; }
 
         public TNODE(EntityTypeEnum entityTypeEnum)
         {
+            PrevLinks = new List<LINK>();
+            Links = new List<LINK>();
             EntityTypeEnum = entityTypeEnum;
         }
     }

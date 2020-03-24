@@ -25,6 +25,7 @@ namespace SPA2.Interfaces
         void SetLeftSibling(TNODE nodeL, TNODE nodeR);
 
         void SetLink(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2);
+        void SetPrevLink(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2);
 
         void SetNthChild(int nth, TNODE parent, TNODE child);
 
@@ -38,7 +39,8 @@ namespace SPA2.Interfaces
 
         TNODE GetFirstChild(TNODE parent);
 
-        TNODE_SET GetLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum);
+        List<TNODE> GetLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum);
+        List<TNODE> GetPrevLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum);
 
         bool IsLinked(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2);
 
@@ -46,21 +48,21 @@ namespace SPA2.Interfaces
 
         TNODE GetParent(TNODE node);
 
-        TNODE_SET GetParentedBy(TNODE node);
+        List<TNODE> GetParentedBy(TNODE node);
 
-        TNODE_SET GetParentStar(TNODE node);
+        List<TNODE> GetParentStar(TNODE node);
 
-        TNODE_SET GetParentedStarBy(TNODE node);
+        List<TNODE> GetParentedStarBy(TNODE node);
 
         void SetFollows(TNODE node1, TNODE node2);
 
-        TNODE GetFollows(TNODE node);
+        List<TNODE> GetFollows(TNODE node);
 
-        TNODE_SET GetFollowsStar(TNODE node);
+        List<TNODE> GetFollowsStar(TNODE node);
 
-        TNODE_SET GetFollowedBy(TNODE node);
+        List<TNODE> GetFollowedBy(TNODE node);
 
-        TNODE_SET GetFollowedStarBy(TNODE node);
+        List<TNODE> GetFollowedStarBy(TNODE node);
 
         bool IsFollowed(TNODE node1, TNODE node2);
 

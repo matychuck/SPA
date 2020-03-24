@@ -25,62 +25,115 @@ namespace SPA2.AST
 
         public TNODE GetFirstChild(TNODE parent)
         {
-            LINK childLink = parent.Links.Where(i => i.LinkTypeEnum == LinkTypeEnum.Child).FirstOrDefault();
-            return childLink == null ? null : childLink.LinkNode;
+            List<TNODE> childNodes = GetLinkedNodes(parent, LinkTypeEnum.Child);
+            return childNodes.FirstOrDefault();
         }
 
-        public TNODE_SET GetFollowedBy(TNODE node)
+        public List<TNODE> GetFollowedBy(TNODE node)
         {
-            throw new NotImplementedException();
+            return GetPrevLinkedNodes(node, LinkTypeEnum.Follows);
         }
 
-        public TNODE_SET GetFollowedStarBy(TNODE node)
+        public List<TNODE> GetFollowedStarBy(TNODE node)
         {
-            throw new NotImplementedException();
+            List<TNODE> nodes = new List<TNODE>();
+            return GetFollowedStarBy(node, nodes);
         }
 
-        public TNODE GetFollows(TNODE node)
+        private List<TNODE> GetFollowedStarBy(TNODE node, List<TNODE> tempList)
         {
-            throw new NotImplementedException();
+            foreach (TNODE tnode in GetFollowedBy(node))
+            {
+                tempList.Add(tnode);
+                GetFollowedStarBy(tnode, tempList);
+            }
+            return tempList;
         }
 
-        public TNODE_SET GetFollowsStar(TNODE node)
+        public List<TNODE> GetFollows(TNODE node)
         {
-            throw new NotImplementedException();
+            return GetLinkedNodes(node,LinkTypeEnum.Follows);
         }
 
-        public TNODE_SET GetLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum)
+        public List<TNODE> GetFollowsStar(TNODE node)
         {
-            TNODE_SET node_Set = new TNODE_SET();
-            node_Set.nodes = node.Links.Where(i => i.LinkTypeEnum == linkTypeEnum).Select(i => i.LinkNode).ToList();
-            return node_Set;
+            List<TNODE> nodes = new List<TNODE>();
+            return GetFollowsStar(node, nodes);
+            
+        }
+
+        private List<TNODE> GetFollowsStar(TNODE node, List<TNODE> tempList)
+        {
+            foreach(TNODE tnode in GetFollows(node))
+            {
+                tempList.Add(tnode);
+                GetFollowsStar(tnode, tempList);
+            }
+            return tempList;
+        }
+
+        public List<TNODE> GetLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum)
+        {
+            List<TNODE> nodes = new List<TNODE>();
+            nodes = node.Links.Where(i => i.LinkTypeEnum == linkTypeEnum).Select(i => i.LinkNode).ToList();
+            return nodes;
+
+        }
+
+        public List<TNODE> GetPrevLinkedNodes(TNODE node, LinkTypeEnum linkTypeEnum)
+        {
+            List<TNODE> nodes = new List<TNODE>();
+            nodes = node.PrevLinks.Where(i => i.LinkTypeEnum == linkTypeEnum).Select(i => i.LinkNode).ToList();
+            return nodes;
 
         }
 
         public TNODE GetNthChild(int nth, TNODE parent)
         {
-            LINK link = parent.Links.Where(i => i.LinkTypeEnum == LinkTypeEnum.Child).ElementAtOrDefault(nth);
-            return link == null ? null : link.LinkNode;
+            return GetLinkedNodes(parent, LinkTypeEnum.Child).ElementAtOrDefault(nth);
         }
 
         public TNODE GetParent(TNODE node)
         {
-            return node.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Parent).Select(y => y.LinkNode).FirstOrDefault();
+            return GetLinkedNodes(node, LinkTypeEnum.Parent).FirstOrDefault();
         }
 
-        public TNODE_SET GetParentedBy(TNODE node)
+        public List<TNODE> GetParentedBy(TNODE node)
         {
-            throw new NotImplementedException();
+            return GetPrevLinkedNodes(node, LinkTypeEnum.Parent);
         }
 
-        public TNODE_SET GetParentedStarBy(TNODE node)
+        public List<TNODE> GetParentedStarBy(TNODE node)
         {
-            throw new NotImplementedException();
+            List<TNODE> nodes = new List<TNODE>();
+            return GetParentedStarBy(node, nodes);
         }
 
-        public TNODE_SET GetParentStar(TNODE node)
+        private List<TNODE> GetParentedStarBy(TNODE node, List<TNODE> tempList)
         {
-            throw new NotImplementedException();
+            foreach (TNODE tnode in GetParentedBy(node))
+            {
+                tempList.Add(tnode);
+                GetParentedStarBy(tnode, tempList);
+            }
+            return tempList;
+        }
+
+
+        public List<TNODE> GetParentStar(TNODE node)
+        {
+            List<TNODE> nodes = new List<TNODE>();
+            TNODE tempNode = node;
+            while(tempNode != null)
+            {
+                TNODE parentNode = GetParent(tempNode);
+                if(parentNode != null)
+                {
+                    nodes.Add(parentNode);
+                }
+                tempNode = parentNode;
+            }
+            return nodes;
         }
 
         public TNODE GetRoot()
@@ -96,55 +149,28 @@ namespace SPA2.AST
         //Does node2 follow node1
         public bool IsFollowed(TNODE node1, TNODE node2)
         {
-            return node2.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Follows && x.LinkNode == node1);
+            return GetFollows(node2).Contains(node1);
         }
 
         public bool IsFollowedStar(TNODE node1, TNODE node2)
         {
-            if (node2.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Follows && x.LinkNode == node1))
-            {
-                return true;
-            }
-            else
-            {
-                if (node2.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Follows).Count() != 0)
-                {
-                    foreach (TNODE onRight in node2.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Follows).Select(y => y.LinkNode))
-                    {
-                        IsFollowedStar(onRight, node1);
-                    }
-                }
-            }
-            return false;
+            return GetFollowsStar(node2).Contains(node1);
         }
 
         public bool IsLinked(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2)
         {
-            return node1.Links.Where(i => i.LinkTypeEnum == linkTypeEnum && i.LinkNode == node2).Any();
+            return GetLinkedNodes(node1, linkTypeEnum).Contains(node2);
         }
 
         public bool IsParent(TNODE parent, TNODE child)
         {
-            return parent.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Child && x.LinkNode == child);
+            return GetParent(child) == parent;
         }
 
         public bool IsParentStar(TNODE parent, TNODE child)
         {
-            if (parent.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Child && x.LinkNode == child))
-            {
-                return true;
-            }
-            else
-            {
-                if (parent.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Child).Count() != 0)
-                {
-                    foreach (TNODE relative in parent.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Child).Select(y => y.LinkNode))
-                    {
-                        IsParentStar(relative, child);
-                    }
-                }
-            }
-            return false;
+            return GetParentStar(child).Contains(parent);
+
         }
 
         public void SetAttr(TNODE node, ATTR attr)
@@ -154,41 +180,45 @@ namespace SPA2.AST
 
         public void SetChildOfLink(TNODE child, TNODE parent)
         {
-            if (!parent.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Child && x.LinkNode == child))
-            {
-                parent.Links.Add(new LINK(LinkTypeEnum.Child, child));
-            }
+            SetLink(LinkTypeEnum.Child, parent, child);
 
         }
 
         public void SetFirstChild(TNODE parent, TNODE child)
         {
-            if (parent.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Child))
+            
+            if(GetFirstChild(parent) == null)
             {
-                var link = parent.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Child && x.LinkNode == child).FirstOrDefault();
-                parent.Links.Remove(link);
-                parent.Links.Insert(0, new LINK(LinkTypeEnum.Child, child));
+                SetChildOfLink(child, parent);
             }
             else
             {
-                parent.Links.Add(new LINK(LinkTypeEnum.Child, child));
+                SetNthChild(1, parent, child);
             }
-
+    
         }
 
         public void SetFollows(TNODE node1, TNODE node2)
         {
-            node1.Links.Add(new LINK(LinkTypeEnum.Follows, node2));
+            SetLink(LinkTypeEnum.Follows, node1, node2);
+            SetPrevLink(LinkTypeEnum.Follows, node2, node1);
         }
 
         public void SetLeftSibling(TNODE nodeL, TNODE nodeR)
         {
-            nodeR.Links.Add(new LINK(LinkTypeEnum.LeftSibling, nodeL));
+            SetLink(LinkTypeEnum.LeftSibling, nodeL, nodeR);
+            SetLink(LinkTypeEnum.RightSibling, nodeL, nodeR);
+
         }
 
         public void SetLink(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2)
         {
             node1.Links.Add(new LINK(linkTypeEnum, node2));
+        }
+
+        public void SetPrevLink(LinkTypeEnum linkTypeEnum, TNODE node1, TNODE node2)
+        {
+            node1.PrevLinks.Add(new LINK(linkTypeEnum, node2));
         }
 
         public void SetNthChild(int nth, TNODE parent, TNODE child)
@@ -206,14 +236,16 @@ namespace SPA2.AST
             }
         }
 
-        public void SetParent(TNODE parent, TNODE child)
+        public void SetParent(TNODE child, TNODE parent)
         {
-            child.Links.Add(new LINK(LinkTypeEnum.Parent, parent));
+            SetLink(LinkTypeEnum.Parent, child, parent);
+            SetPrevLink(LinkTypeEnum.Parent, parent, child);
         }
 
         public void SetRightSibling(TNODE nodeL, TNODE nodeR)
         {
-            nodeL.Links.Add(new LINK(LinkTypeEnum.RightSibling, nodeR));
+            SetLink(LinkTypeEnum.RightSibling, nodeL, nodeR);
+            SetLink(LinkTypeEnum.LeftSibling, nodeL, nodeR);
         }
 
         public void SetRoot(TNODE node)
@@ -221,15 +253,7 @@ namespace SPA2.AST
             Root = node;
         }
 
-        //metody pomocnicze
-        private TNODE ReturnParent(List<TNODE> parents, TNODE child)
-        {
-            foreach (TNODE parent in parents)
-            {
-                if (parent.Links.Any(x => x.LinkTypeEnum == LinkTypeEnum.Child && x.LinkNode == child)) return parent;
-                else ReturnParent(parent.Links.Where(x => x.LinkTypeEnum == LinkTypeEnum.Child).Select(y => y.LinkNode).ToList(), child);
-            }
-            return null;
-        }
+
+        
     }
 }
