@@ -8,43 +8,76 @@ using System.Threading.Tasks;
 
 namespace SPA2.ProcTable
 {
-    class ProcTable : IProcTable
+    public class ProcTable : IProcTable
     {
-        public List<ProcRefs> ProcRefsList { get; set; }
+        public List<Procedure> Procedures { get; set; }
+
+        public ProcTable()
+        {
+            Procedures = new List<Procedure>();
+        }
 
         public TNODE GetAstRoot(string procName)
         {
-            throw new NotImplementedException();
+            var proc = GetProc(procName);
+            return proc == null ? null : proc.AstRoot;
         }
 
         public TNODE GetAstRoot(int index)
         {
-            throw new NotImplementedException();
+            var proc = GetProc(index);
+            return proc == null ? null : proc.AstRoot;
         }
 
-        public ProcRefs GetProcRefs(string procName)
+        public Procedure GetProc(int index)
         {
-            throw new NotImplementedException();
+            return Procedures.Where(i => i.Index == index).FirstOrDefault();
         }
 
-        public ProcRefs GetProcRefs(int index)
+        public Procedure GetProc(string procName)
         {
-            throw new NotImplementedException();
+            return Procedures.Where(i => i.Name == procName).FirstOrDefault();
+        }
+
+        public int GetProcIndex(string procName)
+        {
+            var procedure = GetProc(procName);
+            return procedure == null ? -1 : procedure.Index;
         }
 
         public int GetSize()
         {
-            throw new NotImplementedException();
+            return Procedures.Count();
         }
 
         public int InsertProc(string procName)
         {
-            throw new NotImplementedException();
+            if (Procedures.Where(i => i.Name == procName).Any())
+            {
+                return -1;
+            }
+            else
+            {
+                Procedure variable = new Procedure(procName);
+                variable.Index = GetSize();
+                Procedures.Add(variable);
+                return GetProcIndex(procName);
+            }
         }
 
         public int SetAstRoot(string procName, TNODE node)
         {
-            throw new NotImplementedException();
+            var procedure = GetProc(procName);
+            if(procedure == null)
+            {
+                return -1;
+
+            }
+            else
+            {
+                procedure.AstRoot = node;
+                return procedure.Index;
+            }
         }
     }
 }

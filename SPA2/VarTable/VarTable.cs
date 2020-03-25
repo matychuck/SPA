@@ -8,43 +8,49 @@ using System.Threading.Tasks;
 
 namespace SPA2.VarTable
 {
-    class VarTable : IVarTable
+    public class VarTable : IVarTable
     {
-        public List<VarRefs> VarRefsList { get; set; }
+        public List<Variable> Variables { get; set; }
 
-        public TNODE GetAstRoot(string procName)
+        public VarTable()
         {
-            throw new NotImplementedException();
-        }
-
-        public TNODE GetAstRoot(int index)
-        {
-            throw new NotImplementedException();
+            Variables = new List<Variable>();
         }
 
         public int GetSize()
         {
-            throw new NotImplementedException();
+            return Variables.Count();
         }
 
-        public VarRefs GetVarRefs(string procName)
+        public Variable GetVar(int index)
         {
-            throw new NotImplementedException();
+            return Variables.Where(i => i.Index == index).FirstOrDefault();
         }
 
-        public VarRefs GetVarRefs(int index)
+        public Variable GetVar(string varName)
         {
-            throw new NotImplementedException();
+            return Variables.Where(i => i.Name == varName).FirstOrDefault();
         }
 
-        public int InsertVar(string procName)
+        public int GetVarIndex(string varName)
         {
-            throw new NotImplementedException();
+            var variable = GetVar(varName);
+            return variable == null ? -1 : variable.Index;
         }
 
-        public int SetAstRoot(string procName, TNODE node)
+        public int InsertVar(string varName)
         {
-            throw new NotImplementedException();
+            if(Variables.Where(i=>i.Name == varName).Any())
+            {
+                return -1;
+            }
+            else
+            {
+                Variable variable = new Variable(varName);
+                variable.Index = GetSize();
+                Variables.Add(variable);
+                return GetVarIndex(varName);
+            }
         }
     }
 }

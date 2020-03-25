@@ -11,8 +11,9 @@ namespace SPA2.Interfaces
     interface IProcTable
     {
         int InsertProc(string procName);
-        ProcRefs GetProcRefs(string procName);
-        ProcRefs GetProcRefs(int index);
+        Procedure GetProc(int index);
+        Procedure GetProc(string procName);
+        int GetProcIndex(string procName);
         int GetSize();
         int SetAstRoot(string procName, TNODE node);
         TNODE GetAstRoot(string procName);
