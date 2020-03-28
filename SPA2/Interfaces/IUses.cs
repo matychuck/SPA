@@ -9,23 +9,67 @@ using System.Threading.Tasks;
 
 namespace SPA2.Interfaces
 {
+    /// <summary>
+    /// Interfejs Uses
+    /// </summary>
     public interface IUses
     {
-        // Zapisuje fakt, że Uses(stmt,var) jest prawdziwe
+        /// <summary>
+        /// Ustaw relację Uses między zmienną a instrukcją
+        /// </summary>
+        /// <param name="stmt">Instrukcja</param>
+        /// <param name="var">Zmienna</param>
         void SetUses(Statement stmt, Variable var);
-        // Zapisuje fakt, że Uses(proc,var) jest prawdziwe
+
+        /// <summary>
+        /// Ustaw relację Uses między zmienną a procedurą
+        /// </summary>
+        /// <param name="proc">Procedura</param>
+        /// <param name="var">Zmienna</param>
         void SetUses(Procedure proc, Variable var);
-        // Zwraca listę zmiennych, które używane są przez instrukcję [Uses(stmt,var)]
+
+        /// <summary>
+        /// Pobierz zmienne będące w relacji Uses z instrukcją
+        /// </summary>
+        /// <param name="stmt">Instrukcja</param>
+        /// <returns>Zmienne</returns>
         List<Variable> GetUsed(Statement stmt);
-        // Zwraca listę zmiennych, które używane są przez procedure [Uses(proc,var)]
+
+        /// <summary>
+        /// Pobierz zmienne będące w relacji Uses z procedurą
+        /// </summary>
+        /// <param name="proc">Procedura</param>
+        /// <returns>Zmienne</returns>
         List<Variable> GetUsed(Procedure proc);
-        // Zwraca listę instrukcji takich, że Uses(stmt,var) 
+
+        /// <summary>
+        /// Pobierz instrukcje które są w relacji Uses ze zmienną
+        /// </summary>
+        /// <param name="var">Zmienna</param>
+        /// <returns>Instrukcje</returns>
         List<Statement> GetUsesForStmts(Variable var);
-        // Zwraca listę procedur takich, że Uses(proc,var) 
+
+        /// <summary>
+        /// Pobierz procedury które są w relacji Uses ze zmienną
+        /// </summary>
+        /// <param name="var">Zmienna</param>
+        /// <returns>Procedury</returns>
         List<Procedure> GetUsesForProcs(Variable var);
-        // Jeśli zmienna 'var' używana jest przez instrukcję 'stat' zwraca TRUE, w przeciwnym razie FALSE
+
+        /// <summary>
+        /// Czy zmienna jest w relacji Uses z instrukcją?
+        /// </summary>
+        /// <param name="var">Zmienna</param>
+        /// <param name="stat">Instrukcja</param>
+        /// <returns>Czy są w relacji?</returns>
         bool IsUsed(Variable var, Statement stat);
-        // Jeśli zmienna 'var' używana jest przez procedurę 'proc' zwraca TRUE, w przeciwnym razie FALSE
+
+        /// <summary>
+        /// Czy zmienna jest w relacji Uses z procedurą?
+        /// </summary>
+        /// <param name="var">Zmienna</param>
+        /// <param name="proc">Procedura</param>
+        /// <returns>Czy są w relacji?</returns>
         bool IsUsed(Variable var, Procedure proc);
     }
 }
