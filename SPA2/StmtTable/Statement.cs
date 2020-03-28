@@ -1,0 +1,29 @@
+﻿using SPA2.AST;
+using SPA2.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SPA2.StmtTable
+{
+    public class Statement
+    {
+        public int CodeLine { get; set; }
+        public EntityTypeEnum Type{ get; set; }
+        public TNODE AstRoot { get; set; }
+        public Dictionary<int, bool> ModifiesList { get; set; }
+        public Statement(EntityTypeEnum entityTypeEnum, int codeLine)
+        {
+            if(!(entityTypeEnum == EntityTypeEnum.Assign || entityTypeEnum == EntityTypeEnum.If || entityTypeEnum == EntityTypeEnum.While || entityTypeEnum == EntityTypeEnum.Call))
+            {
+                throw new InvalidOperationException();
+            }
+            CodeLine = codeLine;
+            Type = entityTypeEnum;
+            ModifiesList = new Dictionary<int, bool>();
+
+        }
+    }
+}

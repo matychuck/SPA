@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using SPA2.AST;
 using SPA2.Enums;
+using SPA2.Interfaces;
+using SPA2.VarTable;
 
 namespace SPA2.AST
 {
@@ -12,8 +14,8 @@ namespace SPA2.AST
     {
         static void Main(string[] args)
         {
-            AST ast = new AST();
-            ast.SetRoot(ast.CreateTNode(EntityTypeEnum.Procedure));
+            
+
         }
     }
 }

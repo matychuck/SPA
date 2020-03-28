@@ -11,11 +11,10 @@ namespace SPA2.Interfaces
     interface IVarTable
     {
         int InsertVar(string procName);
-        VarRefs GetVarRefs(string procName);
-        VarRefs GetVarRefs(int index);
+        Variable GetVar(int index);
+        Variable GetVar(string varName);
+        int GetVarIndex(string varName);
         int GetSize();
-        int SetAstRoot(string procName, TNODE node);
-        TNODE GetAstRoot(string procName);
-        TNODE GetAstRoot(int index);
+        
     }
 }
