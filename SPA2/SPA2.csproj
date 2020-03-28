@@ -53,6 +53,7 @@
     <Compile Include="Interfaces\IModifies.cs" />
     <Compile Include="Interfaces\IProcTable.cs" />
     <Compile Include="Interfaces\IStmtTable.cs" />
+    <Compile Include="Interfaces\IUses.cs" />
     <Compile Include="Interfaces\IVarTable.cs" />
     <Compile Include="Modifies\Modifies.cs" />
     <Compile Include="Parser\Parser.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StmtTable\Statement.cs" />
     <Compile Include="StmtTable\StmtTable.cs" />
+    <Compile Include="Uses\Uses.cs" />
     <Compile Include="VarTable\Variable.cs" />
     <Compile Include="VarTable\VarTable.cs" />
   </ItemGroup>

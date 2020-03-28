@@ -10,68 +10,66 @@ using System.Threading.Tasks;
 namespace SPA2.Interfaces
 {
     /// <summary>
-    /// Interfejs Modifies
+    /// Interfejs Uses
     /// </summary>
-    public interface IModifies
+    public interface IUses
     {
         /// <summary>
-        /// Ustaw relację Modifies między zmienną a instrukcją
+        /// Ustaw relację Uses między zmienną a instrukcją
         /// </summary>
         /// <param name="stmt">Instrukcja</param>
         /// <param name="var">Zmienna</param>
-        void SetModifies(Statement stmt, Variable var);
+        void SetUses(Statement stmt, Variable var);
 
         /// <summary>
-        /// Ustaw relację Modifies między zmienną a procedurą
+        /// Ustaw relację Uses między zmienną a procedurą
         /// </summary>
         /// <param name="proc">Procedura</param>
         /// <param name="var">Zmienna</param>
-        void SetModifies(Procedure proc, Variable var);
+        void SetUses(Procedure proc, Variable var);
 
         /// <summary>
-        /// Pobierz zmienne będące w relacji Modifies z instrukcją
+        /// Pobierz zmienne będące w relacji Uses z instrukcją
         /// </summary>
         /// <param name="stmt">Instrukcja</param>
         /// <returns>Zmienne</returns>
-        List<Variable> GetModified(Statement stmt);
+        List<Variable> GetUsed(Statement stmt);
 
         /// <summary>
-        /// Pobierz zmienne będące w relacji Modifies z procedurą
+        /// Pobierz zmienne będące w relacji Uses z procedurą
         /// </summary>
         /// <param name="proc">Procedura</param>
         /// <returns>Zmienne</returns>
-        List<Variable> GetModified(Procedure proc);
+        List<Variable> GetUsed(Procedure proc);
 
         /// <summary>
-        /// Pobierz instrukcje które są w relacji Modifies ze zmienną
+        /// Pobierz instrukcje które są w relacji Uses ze zmienną
         /// </summary>
         /// <param name="var">Zmienna</param>
         /// <returns>Instrukcje</returns>
-        List<Statement> GetModifiesForStmts(Variable var);
+        List<Statement> GetUsesForStmts(Variable var);
 
         /// <summary>
-        /// Pobierz procedury które są w relacji Modifies ze zmienną
+        /// Pobierz procedury które są w relacji Uses ze zmienną
         /// </summary>
         /// <param name="var">Zmienna</param>
         /// <returns>Procedury</returns>
-        List<Procedure> GetModifiesForProcs(Variable var);
+        List<Procedure> GetUsesForProcs(Variable var);
 
         /// <summary>
-        /// Czy zmienna jest w relacji Modifies z instrukcją?
+        /// Czy zmienna jest w relacji Uses z instrukcją?
         /// </summary>
         /// <param name="var">Zmienna</param>
         /// <param name="stat">Instrukcja</param>
         /// <returns>Czy są w relacji?</returns>
-        bool IsModified(Variable var, Statement stat);
+        bool IsUsed(Variable var, Statement stat);
 
         /// <summary>
-        /// Czy zmienna jest w relacji Modifies z procedurą?
+        /// Czy zmienna jest w relacji Uses z procedurą?
         /// </summary>
         /// <param name="var">Zmienna</param>
         /// <param name="proc">Procedura</param>
         /// <returns>Czy są w relacji?</returns>
-        bool IsModified(Variable var, Procedure proc);
-
-
+        bool IsUsed(Variable var, Procedure proc);
     }
 }
