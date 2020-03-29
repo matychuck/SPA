@@ -58,5 +58,10 @@ namespace SPA2.Enums
         /// </summary>
         Constant = 9,
 
+        /// <summary>
+        /// Polecenie
+        /// </summary>
+        Statement = 10,
+
     }
 }
