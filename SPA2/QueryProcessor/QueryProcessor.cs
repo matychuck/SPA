@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SPA2.QueryProcessor1
+namespace SPA2.QueryProcessor
 {
     public static class QueryProcessor
     {
