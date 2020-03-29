@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace SPA2.QueryProcessor
+namespace SPA2.QueryProcessor1
 {
     public static class QueryProcessor
     {
-        static void processQuery(String query)
+        public static void processQuery(String query)
         {
             Console.WriteLine(query);
         }
