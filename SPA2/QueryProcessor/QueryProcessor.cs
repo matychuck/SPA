@@ -1,6 +1,7 @@
 ﻿using System;
 using SPA2.Enums;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SPA2.QueryProcessor
 {
@@ -11,22 +12,22 @@ namespace SPA2.QueryProcessor
         public static void processQuery(String query)
         {
             //Console.WriteLine(query);
-            string[] queryParts = query.Split(';');
+            query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
+            string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+           for(int i = 0; i < queryParts - 2; i++){
+                decodeVarDefinitionAndInsertToDict(queryParts[i].Trim()); //dekoduje np. assign a, a1;
+            }
+         //   printParsingResults();
 
             String selectPart = queryParts[queryParts.Length - 1];
-
-            Array.Resize(ref queryParts, queryParts.Length - 2);
-            foreach (String varsDefinition in queryParts) {
-                decodeVarDefinitionAndInsertToDict(varsDefinition.Trim());
-            }
-
-            printParsingResults();
+            processSelectPart(selectPart.Trim());
         }
 
         private static void decodeVarDefinitionAndInsertToDict(String varsDefinition)
         {
-            string[] varsParts = varsDefinition.Replace(" ", ",").Split(','); 
-            string varTypeAsString = varsParts[0]; //Typ jako string
+            string[] varsParts = varsDefinition.Replace(" ", ",").Split(',', StringSplitOptions.RemoveEmptyEntries); 
+            string varTypeAsString = varsParts[0]; //Typ jako string (statement, assign, wgile albo procedure)
             EntityTypeEnum typeEnum;
 
             switch (varTypeAsString.ToLower()) {
@@ -51,6 +52,13 @@ namespace SPA2.QueryProcessor
                     vars.Add(varsParts[i], typeEnum);
             }
         }
+
+        private static void processSelectPart(string selectPart)
+        {
+         //to do...
+            Console.WriteLine(selectPart);
+        }
+
 
         private static void printParsingResults()
         {
