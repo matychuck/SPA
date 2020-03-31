@@ -10,5 +10,7 @@ namespace SPA2.QueryProcessor.patterns.common
     interface ParserPattern
     {
         ParsedSelect parse(String expression);
+
+        bool isMatched(String expression);
     }
 }

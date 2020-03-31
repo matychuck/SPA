@@ -3,6 +3,7 @@ using SPA2.Enums;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SPA2.QueryProcessor.patterns.common;
+using SPA2.QueryProcessor.model;
 
 namespace SPA2.QueryProcessor
 {
@@ -15,8 +16,8 @@ namespace SPA2.QueryProcessor
             //Console.WriteLine(query);
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
             string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-           for(int i = 0; i < queryParts - 2; i++){
+            
+           for(int i = 0; i < queryParts.Length - 2; i++){
                 decodeVarDefinitionAndInsertToDict(queryParts[i].Trim()); //dekoduje np. assign a, a1;
             }
          //   printParsingResults();
@@ -27,7 +28,7 @@ namespace SPA2.QueryProcessor
 
         private static void decodeVarDefinitionAndInsertToDict(String varsDefinition)
         {
-            string[] varsParts = varsDefinition.Replace(" ", ",").Split(',', StringSplitOptions.RemoveEmptyEntries); 
+            string[] varsParts = varsDefinition.Replace(" ", ",").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries); 
             string varTypeAsString = varsParts[0]; //Typ jako string (statement, assign, wgile albo procedure)
             EntityTypeEnum typeEnum;
 
@@ -56,12 +57,22 @@ namespace SPA2.QueryProcessor
 
         private static void processSelectPart(string selectPart)
         {
-            foreach(ParserPattern pattern in SelectPatterns.getSelectPatterns())
+            ParsedSelect parsed = null;
+            foreach (ParserPattern pattern in SelectPatterns.getSelectPatterns())
             {
-                pattern.parse(selectPart);
+                if(pattern.isMatched(selectPart))
+                {
+                    parsed = pattern.parse(selectPart);
+                }
             }
-         //to do...
-            Console.WriteLine(selectPart);
+
+            if(parsed != null)
+            {
+                //TODO: wykonujemy operacje (pobieramy informacje z tabel i drzewa) i sprawdzamy czy podane dane (parametry) są tymi z deklaracji
+            } else
+            {
+                Console.WriteLine("Brak instrukcji");
+            }
         }
 
 
