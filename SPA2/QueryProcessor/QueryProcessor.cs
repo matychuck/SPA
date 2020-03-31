@@ -2,6 +2,7 @@
 using SPA2.Enums;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using SPA2.QueryProcessor.patterns.common;
 
 namespace SPA2.QueryProcessor
 {
@@ -55,6 +56,10 @@ namespace SPA2.QueryProcessor
 
         private static void processSelectPart(string selectPart)
         {
+            foreach(ParserPattern pattern in SelectPatterns.getSelectPatterns())
+            {
+                pattern.parse(selectPart);
+            }
          //to do...
             Console.WriteLine(selectPart);
         }

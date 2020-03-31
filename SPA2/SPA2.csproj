@@ -60,6 +60,14 @@
     <Compile Include="ProcTable\ProcTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryProcessor\model\EntityRelationshipEnum.cs" />
+    <Compile Include="QueryProcessor\model\ParsedSelect.cs" />
+    <Compile Include="QueryProcessor\model\SuchThatPart.cs" />
+    <Compile Include="QueryProcessor\patterns\common\ParserPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\common\SelectPatterns.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectSuchThatPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectSuchThatWithPattern.cs" />
     <Compile Include="QueryProcessor\QueryProcessor.cs" />
     <Compile Include="StmtTable\Statement.cs" />
     <Compile Include="StmtTable\StmtTable.cs" />
