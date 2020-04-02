@@ -70,7 +70,10 @@ namespace SPA2.QueryProcessor
         {
             string[] dictKeys = { "SELECT", "SUCH THAT", "WITH" };
             
-            queryDetails.Add("SELECT", new string[] { separatedQuery[0].Trim(),});
+            string selectVars = separatedQuery[0].Trim();
+            string[] separatingStrings = { ",", " ",};
+            string[] selectVarsInTable = selectVars.Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
+            queryDetails.Add("SELECT", selectVarsInTable);
             
             for(int i = 1; i < separatedQuery.Length; i++)
             {
@@ -93,7 +96,6 @@ namespace SPA2.QueryProcessor
 
             foreach (KeyValuePair<string, string[]> oneDetail in queryDetails)
             {
-                //Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
                 Console.WriteLine("{0}:", oneDetail.Key);
                 foreach(string word in oneDetail.Value)
                 {
@@ -129,10 +131,10 @@ namespace SPA2.QueryProcessor
                 }
             }
             return varAttributes;
-                
-
-
         }
-    }
 
+        public static string[] GetVarToSelect() {
+            return queryDetails["SELECT"];
+        }
+    } 
 }

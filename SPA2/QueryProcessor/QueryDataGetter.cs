@@ -1,5 +1,6 @@
 ﻿using System;
 using SPA2.Enums;
+using System.Collections.Generic;
 
 namespace SPA2.QueryProcessor
 {
@@ -9,6 +10,14 @@ namespace SPA2.QueryProcessor
 		public static void GetData()
 		{
 			InsertIndexesIntoVarTables();
+			
+			//Algorithm here...
+			//foreach(KeyValuePair<string, int[]> item in variableIndexes)
+   //         {
+			//	Console.WriteLine(item.Key);
+   //         }
+			//After algorithm....
+			SendDataToPrint();
 		}
 
 		private static void InsertIndexesIntoVarTables()
@@ -19,8 +28,8 @@ namespace SPA2.QueryProcessor
 			{
 				List<string> attributes = null;
 
-				if (varAttributes.ContainsKey(oneVar))
-					attributes = varAttributes[oneVar];
+				if (varAttributes.ContainsKey(oneVar.Key))
+					attributes = varAttributes[oneVar.Key];
 
 				switch (oneVar.Value)
 				{
@@ -45,7 +54,7 @@ namespace SPA2.QueryProcessor
 						break;
 
 					case EntityTypeEnum.Statement:
-						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes));
+						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Statement));
 						break;
 					default:
 						throw new System.ArgumentException("Wrong typo!");
@@ -63,9 +72,22 @@ namespace SPA2.QueryProcessor
 			return new int[] { 1, 2, 3 };
 		}
 
-		private static int[] GetStatementIndexes(List<string> attributes, EntityTypeEnum enumType = null)
+		private static int[] GetStatementIndexes(List<string> attributes, EntityTypeEnum enumType)
 		{
 			return new int[] { 1, 2, 3 };
+		}
+
+		private static void SendDataToPrint()
+        {
+			string[] varsToSelect = QueryProcessor.GetVarToSelect();
+			Dictionary<string, int[]> varIndexesToPrint = new Dictionary<string, int[]>();
+			foreach(string var in varsToSelect)
+            {
+				string trimedVar = var.Trim();
+				varIndexesToPrint.Add(trimedVar, variableIndexes[trimedVar]);
+            }
+
+			ResultPrinter.Print(varIndexesToPrint);
 		}
 }
 }
