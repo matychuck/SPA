@@ -2,31 +2,34 @@
 using SPA2.Enums;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using SPA2.QueryProcessor;
 
 namespace SPA2.QueryProcessor
 {
     public class QueryProcessor
     {
-        static Dictionary<string, EntityTypeEnum> vars = new Dictionary<string, EntityTypeEnum>();
+        private static Dictionary<string, EntityTypeEnum> vars = new Dictionary<string, EntityTypeEnum>();
+        private static Dictionary<string, string[]> queryDetails = new Dictionary<string, string[]>();
 
-        public static void processQuery(String query)
+        public static void ProcessQuery(String query)
         {
-            //Console.WriteLine(query);
+            Console.WriteLine("QUERY:\n\t {0}", query);
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
             string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-           for(int i = 0; i < queryParts - 2; i++){
-                decodeVarDefinitionAndInsertToDict(queryParts[i].Trim()); //dekoduje np. assign a, a1;
+           for(int i = 0; i < queryParts.Length - 1; i++){
+                DecodeVarDefinitionAndInsertToDict(queryParts[i].Trim()); //dekoduje np. assign a, a1;
             }
-         //   printParsingResults();
 
             String selectPart = queryParts[queryParts.Length - 1];
-            processSelectPart(selectPart.Trim());
+            ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
+            PrintParsingResults();
+            QueryDataGetter.GetData();
         }
 
-        private static void decodeVarDefinitionAndInsertToDict(String varsDefinition)
+        private static void DecodeVarDefinitionAndInsertToDict(String varsDefinition)
         {
-            string[] varsParts = varsDefinition.Replace(" ", ",").Split(',', StringSplitOptions.RemoveEmptyEntries); 
+            string[] varsParts = varsDefinition.Replace(" ", ",").Split(','); 
             string varTypeAsString = varsParts[0]; //Typ jako string (statement, assign, wgile albo procedure)
             EntityTypeEnum typeEnum;
 
@@ -43,6 +46,9 @@ namespace SPA2.QueryProcessor
                 case "procedure":
                     typeEnum = EntityTypeEnum.Procedure;
                     break;
+                case "variable":
+                    typeEnum = EntityTypeEnum.Variable;
+                    break;
                 default:
                      throw new System.ArgumentException("Wrong typo!");
             }
@@ -53,19 +59,79 @@ namespace SPA2.QueryProcessor
             }
         }
 
-        private static void processSelectPart(string selectPart)
+        private static void ProcessSelectPart(string selectPart)
         {
-         //to do...
-            Console.WriteLine(selectPart);
+            string[] separatingStrings = { "select", "such that", "with" };
+            string[] separatedQuery = selectPart.ToLower().Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
+            AddQueryDetailsToDict(separatedQuery);
+        }
+
+        private static void AddQueryDetailsToDict(string[] separatedQuery)
+        {
+            string[] dictKeys = { "SELECT", "SUCH THAT", "WITH" };
+            
+            queryDetails.Add("SELECT", new string[] { separatedQuery[0].Trim(),});
+            
+            for(int i = 1; i < separatedQuery.Length; i++)
+            {
+                string[] words = separatedQuery[i].Split(new string[] { "and", }, System.StringSplitOptions.RemoveEmptyEntries);
+                for(int j = 0; j < words.Length; j++)
+                {
+                    words[j] = words[j].Trim();
+                }
+                queryDetails.Add(dictKeys[i], words);
+            }
         }
 
 
-        private static void printParsingResults()
+        private static void PrintParsingResults()
         {
-            Console.WriteLine("Parsing ended");
+            Console.WriteLine("QUERY VARIABLES:");
             foreach (KeyValuePair<string, EntityTypeEnum> oneVar in vars){
                 Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
             }
+
+            foreach (KeyValuePair<string, string[]> oneDetail in queryDetails)
+            {
+                //Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
+                Console.WriteLine("{0}:", oneDetail.Key);
+                foreach(string word in oneDetail.Value)
+                {
+                    Console.WriteLine("\t\"{0}\"", word);
+                }
+
+            }
+        }
+
+        public static Dictionary<string, EntityTypeEnum> GetQueryVars()
+        {
+            return vars;
+        }
+
+        public static Dictionary<string, string[]> GetQueryDetails()
+        {
+            return queryDetails;
+        }
+
+        public static Dictionary<string,  List<string>> GetVarAttributes()
+        {
+            Dictionary<string, List<string>> varAttributes = new Dictionary<string, List<string>>();
+            if(queryDetails.ContainsKey("WITH"))
+            {
+                foreach(string attribute in queryDetails["WITH"])
+                {
+                    string[] attribtueWithValue = attribute.Split('=');
+                    if(!varAttributes.ContainsKey(attribtueWithValue[0].Trim()))
+                    {
+                        varAttributes[attribtueWithValue[0].Trim()] = new List<string>();
+                    } 
+                    varAttributes[attribtueWithValue[0].Trim()].Add(attribtueWithValue[1].Trim());
+                }
+            }
+            return varAttributes;
+                
+
+
         }
     }
 
