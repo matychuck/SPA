@@ -4,12 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SPA2.AST;
 
 namespace SPA2.Parser
 {
     public class Parser
     {
         List<String> reservedWords; // lista słów kluczowych
+        VarTable.VarTable varTable = new VarTable.VarTable(); //tymczasowe rozwiązanie do wypełniania varTable
+        ProcTable.ProcTable procTable = new ProcTable.ProcTable(); //tymczasowe rozwiązanie do wypełniania procTable
+        StmtTable.StmtTable stmtTable = new StmtTable.StmtTable(); //tymczasowe rozwiązanie do wypełniania stmtTable
+        AST.AST tree = new AST.AST(); //tymczasowe tree;
+        Uses.Uses uses = new Uses.Uses();
+        Modifies.Modifies modifies = new Modifies.Modifies();
 
         public Parser()
         {
@@ -116,14 +123,20 @@ namespace SPA2.Parser
             startIndex = endIndex;
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false); // wczytanie nazwy procedury
-            if (!IsVarName(token)) throw new Exception("ParseProcedure: Błędna nazwa procedury, "+token);
+            TNODE newNode = tree.CreateTNode(Enums.EntityTypeEnum.Procedure);
+            if (IsVarName(token)) {
+                procTable.InsertProc(token);
+                procTable.SetAstRoot(token, newNode);
+                if (token == "Main") tree.SetRoot(newNode);
+            }
+            else throw new Exception("ParseProcedure: Błędna nazwa procedury, "+token);
             string procedureName = token;
             startIndex = endIndex;
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true); // wczytanie {
             if (token != "{") throw new Exception("ParseProcedure: Brak nawiasu { po nazwie procedury");
 
-            Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+            Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName, newNode);
         }
 
 
@@ -135,15 +148,17 @@ namespace SPA2.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public void ParseStmtLst(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName)
+        public void ParseStmtLst(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "{") throw new Exception("ParseStmtLst: Brak znaku {");
+            TNODE newNode = tree.CreateTNode(Enums.EntityTypeEnum.Stmtlist); // tworzenie i łączenie stmtList z parentem
+            tree.SetChildOfLink(newNode, parent);
             startIndex = endIndex;
 
             while(lineNumber < lines.Count)
             {
-                Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+                Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName, parent);
                 startIndex = endIndex;
 
                 token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
@@ -164,20 +179,81 @@ namespace SPA2.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public void ParseWhile(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName)
+        public void ParseWhile(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "while") throw new Exception("ParseWhile: Brak słowa kluczowego while");
+            stmtTable.InsertStmt(Enums.EntityTypeEnum.While, lineNumber);
             startIndex = endIndex;
 
+            TNODE whileNode = tree.CreateTNode(Enums.EntityTypeEnum.While); // tworzenie node dla while
+            stmtTable.SetAstRoot(lineNumber, whileNode);
+            tree.SetParent(whileNode, parent); //ustawianie parenta dla while
+
+            TNODE stmtListNode = tree.GetNthChild(0, parent);
+            SettingFollows(whileNode, stmtListNode);
+
+            tree.SetChildOfLink(whileNode, stmtListNode); //łączenie stmlList z while
+            TNODE variableNode = tree.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie while node
+            tree.SetChildOfLink(variableNode, whileNode);
+
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
-            if (!IsVarName(token)) throw new Exception("ParseWhile: Wymagana nazwa zmiennej, "+token);
+            if (IsVarName(token)) {
+                if (varTable.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token);
+                else
+                {
+                    VarTable.Variable var = new VarTable.Variable(token);
+                    SetUsesForFamily(whileNode, var);
+                }
+            }
+            else throw new Exception("ParseWhile: Wymagana nazwa zmiennej, "+token);
             startIndex = endIndex;
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
             if (token != "{") throw new Exception("ParseWhile: Brak znaku {");
 
-            Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+            Parse(lines, startIndex, ref lineNumber, out endIndex, procedureName, whileNode);
+        }
+
+
+        public void SettingFollows(TNODE node, TNODE stmt)
+        {
+            List<TNODE> siblingsList = tree.GetLinkedNodes(stmt, Enums.LinkTypeEnum.Child); //pobieranie siblings o ile istnieją
+            if (siblingsList.Count() != 0)
+            {
+                TNODE prevStmt = siblingsList[siblingsList.Count() - 1];
+                tree.SetFollows(prevStmt, node);
+            }
+        }
+
+        public void SetModifiesForFamily(TNODE node, VarTable.Variable var)
+        {
+            if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
+            {
+                ProcTable.Procedure proc = procTable.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                modifies.SetModifies(proc, var);
+            }
+            else
+            {
+                StmtTable.Statement stmt = stmtTable.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                modifies.SetModifies(stmt, var);
+            }
+            if (tree.GetParent(node) != null) SetModifiesForFamily(tree.GetParent(node), var);
+        }
+
+        public void SetUsesForFamily(TNODE node, VarTable.Variable var)
+        {
+            if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
+            {
+                ProcTable.Procedure proc = procTable.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                uses.SetUses(proc, var);
+            }
+            else
+            {
+                StmtTable.Statement stmt = stmtTable.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                uses.SetUses(stmt, var);
+            }
+            if (tree.GetParent(node) != null) SetUsesForFamily(tree.GetParent(node), var);
         }
 
         /// <summary>
@@ -188,11 +264,25 @@ namespace SPA2.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public void ParseAssign(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName)
+        public void ParseAssign(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (!IsVarName(token)) throw new Exception("ParseAssign: Wymagana nazwa zmiennej, " + token);
+            stmtTable.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumber);
             startIndex = endIndex;
+
+            TNODE assignNode = tree.CreateTNode(Enums.EntityTypeEnum.Assign); // tworzenie node dla assign
+            VarTable.Variable var = new VarTable.Variable(token);
+            varTable.InsertVar(token);
+            stmtTable.SetAstRoot(lineNumber, assignNode);
+            tree.SetParent(assignNode, parent); //ustawianie parenta dla assign
+
+            TNODE stmtListNode = tree.GetNthChild(0, parent);
+            SettingFollows(assignNode, stmtListNode);
+            tree.SetChildOfLink(assignNode, stmtListNode); //łączenie stmlList z assign
+            TNODE variableNode = tree.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie assign node
+            tree.SetChildOfLink(variableNode, assignNode);
+            SetModifiesForFamily(assignNode, var); // ustawianie Modifies
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "=") throw new Exception("ParseAssign: Brak znaku =");
@@ -200,7 +290,8 @@ namespace SPA2.Parser
 
             token = "";
             bool expectedOperation = false;
-            while(lineNumber < lines.Count)
+            TNODE expressionRoot = null; // zmienna przechowująca aktualny wierzchołek expression po prawej stronie assign
+            while (lineNumber < lines.Count)
             {
                 token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
                 startIndex = endIndex;
@@ -209,16 +300,44 @@ namespace SPA2.Parser
                     switch (token)
                     {
                         case "+":
+                            TNODE oldAssignRoot = tree.GetTNodeDeepCopy(expressionRoot);
+                            expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Plus);
+                            tree.SetChildOfLink(oldAssignRoot, expressionRoot);
                             break;
                         default:
-                            throw new Exception("ParseAssign: Nieosługiwane działanie, " + token);
+                            throw new Exception("ParseAssign: Nieobsługiwane działanie, " + token);
                     }
                     expectedOperation = false;
                 }
                 else
                 {
-                    if (IsVarName(token)) { }
-                    else if (IsConstValue(token)) { }
+                    if (IsVarName(token))
+                    {
+                        if (expressionRoot == null)
+                        {
+                            expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Variable);
+
+                            VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
+                            SetUsesForFamily(assignNode, usesVar);
+                        }
+                        else
+                        {
+                            TNODE rightSide = tree.CreateTNode(Enums.EntityTypeEnum.Variable);
+                            tree.SetChildOfLink(rightSide, expressionRoot);
+
+                            VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
+                            SetUsesForFamily(assignNode, usesVar);
+                        }
+                    }
+                    else if (IsConstValue(token))
+                    {
+                        if (expressionRoot == null) expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Constant);
+                        else
+                        {
+                            TNODE rightSide = tree.CreateTNode(Enums.EntityTypeEnum.Constant);
+                            tree.SetChildOfLink(rightSide, expressionRoot);
+                        }
+                    }
                     else throw new Exception("ParseAssign: Spodziewana zmienna lub stała, " + token);
                     expectedOperation = true;
                 }
@@ -230,7 +349,11 @@ namespace SPA2.Parser
                 }
             }
             if (lineNumber == lines.Count && token != ";") throw new Exception("ParseAssign: Spodziewano się znaku ;");
+
+            //łączenie tyci drzewka expresion z assign
+            tree.SetChildOfLink(expressionRoot, assignNode);
         }
+
 
         /// <summary>
         /// Parsowanie
@@ -240,7 +363,7 @@ namespace SPA2.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public void Parse(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName)
+        public void Parse(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);              
             switch(token)
@@ -249,20 +372,19 @@ namespace SPA2.Parser
                     ParseProcedure(lines, startIndex, ref lineNumber, out endIndex);
                     break;
                 case "{":
-                    ParseStmtLst(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+                    ParseStmtLst(lines, startIndex, ref lineNumber, out endIndex, procedureName, parent);
                     break;
                 case "while":
-                    ParseWhile(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+                    ParseWhile(lines, startIndex, ref lineNumber, out endIndex, procedureName, parent);
                     break;
                 default:
                     if (IsVarName(token))
                     {
-                        ParseAssign(lines, startIndex, ref lineNumber, out endIndex, procedureName);
+                        ParseAssign(lines, startIndex, ref lineNumber, out endIndex, procedureName, parent);
                         break;
                     }
                     else throw new Exception("Parse: Niespodziewany token: " + token);
             }
-            
         }
 
 
@@ -276,8 +398,6 @@ namespace SPA2.Parser
             if (name.Length == 0) return false;
             if (!Char.IsLetter(name[0])) return false;
             else if(reservedWords.IndexOf(name) > 0) return false;
-            
-            // TUTAJ CHYBA MOŻNA WRZUCAĆ DO VAR_TABLE
 
             return true;
         }
@@ -309,7 +429,8 @@ namespace SPA2.Parser
             int endIndex;
             string token = GetToken(lines, ref lineNumber, index, out endIndex, true);
             if(token != "procedure") throw new Exception("ReadFile: Spodziewano się słowa kluczowego procedure");
-            Parse(lines, index, ref lineNumber, out endIndex, "");
+            Parse(lines, index, ref lineNumber, out endIndex, "", null);
+
         }
     }
 }

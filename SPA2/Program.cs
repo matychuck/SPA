@@ -17,8 +17,7 @@ namespace SPA2.AST
         {
             // tylko do testow
             Parser.Parser parser = new Parser.Parser();
-            parser.ReadFile("C:\\Users\\Agnieszka\\Documents\\Informatyka\\studia\\magisterka\\Analiza i testowanie systemow informatycznych\\simpleCode1.txt");
-
+            parser.ReadFile("D:\\STUDIA\\AST\\simpleCode1.txt");
 
         }
     }
