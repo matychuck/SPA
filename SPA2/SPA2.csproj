@@ -61,9 +61,13 @@
     <Compile Include="ProcTable\ProcTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryProcessor\patterns\common\ParserPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectSuchThatPattern.cs" />
+    <Compile Include="QueryProcessor\patterns\SelectSuchThatWithPattern.cs" />
     <Compile Include="QueryProcessor\QueryProcessor.cs" />
-	<Compile Include="QueryProcessor\QueryDataGetter.cs" />
-	<Compile Include="QueryProcessor\ResultPrinter.cs" />
+    <Compile Include="QueryProcessor\QueryDataGetter.cs" />
+    <Compile Include="QueryProcessor\ResultPrinter.cs" />
     <Compile Include="StmtTable\Statement.cs" />
     <Compile Include="StmtTable\StmtTable.cs" />
     <Compile Include="Uses\Uses.cs" />
