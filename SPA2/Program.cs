@@ -7,6 +7,7 @@ using SPA2.AST;
 using SPA2.Enums;
 using SPA2.Interfaces;
 using SPA2.VarTable;
+using SPA2.Parser;
 
 namespace SPA2.AST
 {
@@ -14,7 +15,9 @@ namespace SPA2.AST
     {
         static void Main(string[] args)
         {
-            
+            // tylko do testow
+            Parser.Parser parser = new Parser.Parser();
+            parser.ReadFile("D:\\STUDIA\\AST\\simpleCode1.txt");
 
         }
     }

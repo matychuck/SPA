@@ -56,6 +56,7 @@
     <Compile Include="Interfaces\IUses.cs" />
     <Compile Include="Interfaces\IVarTable.cs" />
     <Compile Include="Modifies\Modifies.cs" />
+    <Compile Include="Parser\Parser.cs" />
     <Compile Include="ProcTable\Procedure.cs" />
     <Compile Include="ProcTable\ProcTable.cs" />
     <Compile Include="Program.cs" />

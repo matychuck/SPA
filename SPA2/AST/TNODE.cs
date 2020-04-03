@@ -20,5 +20,13 @@ namespace SPA2.AST
             Links = new List<LINK>();
             EntityTypeEnum = entityTypeEnum;
         }
+
+        public TNODE(TNODE node)
+        {
+            this.Attr = node.Attr;
+            this.Links = node.Links;
+            this.PrevLinks = node.PrevLinks;
+            this.EntityTypeEnum = node.EntityTypeEnum;
+        }
     }
 }

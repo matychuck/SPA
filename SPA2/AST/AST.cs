@@ -18,6 +18,11 @@ namespace SPA2.AST
             return new TNODE(et);
         }
 
+        public TNODE GetTNodeDeepCopy(TNODE node)
+        {
+            return new TNODE(node);
+        }
+
         public ATTR GetAttr(TNODE node)
         {
             return node.Attr;
