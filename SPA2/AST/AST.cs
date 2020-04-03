@@ -8,9 +8,26 @@ using System.Threading.Tasks;
 
 namespace SPA2.AST
 {
-    public class AST : IAST
+    public sealed class AST : IAST
     {
+        private static AST _instance = null;
 
+        public static AST Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AST();
+                }
+                return _instance;
+            }
+        }
+
+        private AST()
+        {
+
+        }
         public TNODE Root { get; set; }
 
         public TNODE CreateTNode(EntityTypeEnum et)

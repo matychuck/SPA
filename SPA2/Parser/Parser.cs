@@ -11,13 +11,6 @@ namespace SPA2.Parser
     public class Parser
     {
         List<String> reservedWords; // lista słów kluczowych
-        VarTable.VarTable varTable = new VarTable.VarTable(); //tymczasowe rozwiązanie do wypełniania varTable
-        ProcTable.ProcTable procTable = new ProcTable.ProcTable(); //tymczasowe rozwiązanie do wypełniania procTable
-        StmtTable.StmtTable stmtTable = new StmtTable.StmtTable(); //tymczasowe rozwiązanie do wypełniania stmtTable
-        AST.AST tree = new AST.AST(); //tymczasowe tree;
-        Uses.Uses uses = new Uses.Uses();
-        Modifies.Modifies modifies = new Modifies.Modifies();
-
         public Parser()
         {
             reservedWords = new List<string>();
@@ -123,11 +116,11 @@ namespace SPA2.Parser
             startIndex = endIndex;
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false); // wczytanie nazwy procedury
-            TNODE newNode = tree.CreateTNode(Enums.EntityTypeEnum.Procedure);
+            TNODE newNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Procedure);
             if (IsVarName(token)) {
-                procTable.InsertProc(token);
-                procTable.SetAstRoot(token, newNode);
-                if (token == "Main") tree.SetRoot(newNode);
+                ProcTable.ProcTable.Instance.InsertProc(token);
+                ProcTable.ProcTable.Instance.SetAstRoot(token, newNode);
+                if (token == "Main") AST.AST.Instance.SetRoot(newNode);
             }
             else throw new Exception("ParseProcedure: Błędna nazwa procedury, "+token);
             string procedureName = token;
@@ -152,8 +145,8 @@ namespace SPA2.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "{") throw new Exception("ParseStmtLst: Brak znaku {");
-            TNODE newNode = tree.CreateTNode(Enums.EntityTypeEnum.Stmtlist); // tworzenie i łączenie stmtList z parentem
-            tree.SetChildOfLink(newNode, parent);
+            TNODE newNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Stmtlist); // tworzenie i łączenie stmtList z parentem
+            AST.AST.Instance.SetChildOfLink(newNode, parent);
             startIndex = endIndex;
 
             while(lineNumber < lines.Count)
@@ -183,23 +176,23 @@ namespace SPA2.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "while") throw new Exception("ParseWhile: Brak słowa kluczowego while");
-            stmtTable.InsertStmt(Enums.EntityTypeEnum.While, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.While, lineNumber);
             startIndex = endIndex;
 
-            TNODE whileNode = tree.CreateTNode(Enums.EntityTypeEnum.While); // tworzenie node dla while
-            stmtTable.SetAstRoot(lineNumber, whileNode);
-            tree.SetParent(whileNode, parent); //ustawianie parenta dla while
+            TNODE whileNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.While); // tworzenie node dla while
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, whileNode);
+            AST.AST.Instance.SetParent(whileNode, parent); //ustawianie parenta dla while
 
-            TNODE stmtListNode = tree.GetNthChild(0, parent);
+            TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
             SettingFollows(whileNode, stmtListNode);
 
-            tree.SetChildOfLink(whileNode, stmtListNode); //łączenie stmlList z while
-            TNODE variableNode = tree.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie while node
-            tree.SetChildOfLink(variableNode, whileNode);
+            AST.AST.Instance.SetChildOfLink(whileNode, stmtListNode); //łączenie stmlList z while
+            TNODE variableNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie while node
+            AST.AST.Instance.SetChildOfLink(variableNode, whileNode);
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (IsVarName(token)) {
-                if (varTable.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token);
+                if (VarTable.VarTable.Instance.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token);
                 else
                 {
                     VarTable.Variable var = new VarTable.Variable(token);
@@ -218,11 +211,11 @@ namespace SPA2.Parser
 
         public void SettingFollows(TNODE node, TNODE stmt)
         {
-            List<TNODE> siblingsList = tree.GetLinkedNodes(stmt, Enums.LinkTypeEnum.Child); //pobieranie siblings o ile istnieją
+            List<TNODE> siblingsList = AST.AST.Instance.GetLinkedNodes(stmt, Enums.LinkTypeEnum.Child); //pobieranie siblings o ile istnieją
             if (siblingsList.Count() != 0)
             {
                 TNODE prevStmt = siblingsList[siblingsList.Count() - 1];
-                tree.SetFollows(prevStmt, node);
+                AST.AST.Instance.SetFollows(prevStmt, node);
             }
         }
 
@@ -230,30 +223,30 @@ namespace SPA2.Parser
         {
             if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
             {
-                ProcTable.Procedure proc = procTable.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
-                modifies.SetModifies(proc, var);
+                ProcTable.Procedure proc = ProcTable.ProcTable.Instance.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                Modifies.Modifies.Instance.SetModifies(proc, var);
             }
             else
             {
-                StmtTable.Statement stmt = stmtTable.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
-                modifies.SetModifies(stmt, var);
+                StmtTable.Statement stmt = StmtTable.StmtTable.Instance.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                Modifies.Modifies.Instance.SetModifies(stmt, var);
             }
-            if (tree.GetParent(node) != null) SetModifiesForFamily(tree.GetParent(node), var);
+            if (AST.AST.Instance.GetParent(node) != null) SetModifiesForFamily(AST.AST.Instance.GetParent(node), var);
         }
 
         public void SetUsesForFamily(TNODE node, VarTable.Variable var)
         {
             if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
             {
-                ProcTable.Procedure proc = procTable.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
-                uses.SetUses(proc, var);
+                ProcTable.Procedure proc = ProcTable.ProcTable.Instance.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                Uses.Uses.Instance.SetUses(proc, var);
             }
             else
             {
-                StmtTable.Statement stmt = stmtTable.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
-                uses.SetUses(stmt, var);
+                StmtTable.Statement stmt = StmtTable.StmtTable.Instance.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                Uses.Uses.Instance.SetUses(stmt, var);
             }
-            if (tree.GetParent(node) != null) SetUsesForFamily(tree.GetParent(node), var);
+            if (AST.AST.Instance.GetParent(node) != null) SetUsesForFamily(AST.AST.Instance.GetParent(node), var);
         }
 
         /// <summary>
@@ -268,20 +261,20 @@ namespace SPA2.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (!IsVarName(token)) throw new Exception("ParseAssign: Wymagana nazwa zmiennej, " + token);
-            stmtTable.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumber);
             startIndex = endIndex;
 
-            TNODE assignNode = tree.CreateTNode(Enums.EntityTypeEnum.Assign); // tworzenie node dla assign
+            TNODE assignNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Assign); // tworzenie node dla assign
             VarTable.Variable var = new VarTable.Variable(token);
-            varTable.InsertVar(token);
-            stmtTable.SetAstRoot(lineNumber, assignNode);
-            tree.SetParent(assignNode, parent); //ustawianie parenta dla assign
+            VarTable.VarTable.Instance.InsertVar(token);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, assignNode);
+            AST.AST.Instance.SetParent(assignNode, parent); //ustawianie parenta dla assign
 
-            TNODE stmtListNode = tree.GetNthChild(0, parent);
+            TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
             SettingFollows(assignNode, stmtListNode);
-            tree.SetChildOfLink(assignNode, stmtListNode); //łączenie stmlList z assign
-            TNODE variableNode = tree.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie assign node
-            tree.SetChildOfLink(variableNode, assignNode);
+            AST.AST.Instance.SetChildOfLink(assignNode, stmtListNode); //łączenie stmlList z assign
+            TNODE variableNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie assign node
+            AST.AST.Instance.SetChildOfLink(variableNode, assignNode);
             SetModifiesForFamily(assignNode, var); // ustawianie Modifies
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
@@ -300,9 +293,9 @@ namespace SPA2.Parser
                     switch (token)
                     {
                         case "+":
-                            TNODE oldAssignRoot = tree.GetTNodeDeepCopy(expressionRoot);
-                            expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Plus);
-                            tree.SetChildOfLink(oldAssignRoot, expressionRoot);
+                            TNODE oldAssignRoot = AST.AST.Instance.GetTNodeDeepCopy(expressionRoot);
+                            expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Plus);
+                            AST.AST.Instance.SetChildOfLink(oldAssignRoot, expressionRoot);
                             break;
                         default:
                             throw new Exception("ParseAssign: Nieobsługiwane działanie, " + token);
@@ -315,15 +308,15 @@ namespace SPA2.Parser
                     {
                         if (expressionRoot == null)
                         {
-                            expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Variable);
+                            expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable);
 
                             VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
                             SetUsesForFamily(assignNode, usesVar);
                         }
                         else
                         {
-                            TNODE rightSide = tree.CreateTNode(Enums.EntityTypeEnum.Variable);
-                            tree.SetChildOfLink(rightSide, expressionRoot);
+                            TNODE rightSide = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable);
+                            AST.AST.Instance.SetChildOfLink(rightSide, expressionRoot);
 
                             VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
                             SetUsesForFamily(assignNode, usesVar);
@@ -331,11 +324,11 @@ namespace SPA2.Parser
                     }
                     else if (IsConstValue(token))
                     {
-                        if (expressionRoot == null) expressionRoot = tree.CreateTNode(Enums.EntityTypeEnum.Constant);
+                        if (expressionRoot == null) expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Constant);
                         else
                         {
-                            TNODE rightSide = tree.CreateTNode(Enums.EntityTypeEnum.Constant);
-                            tree.SetChildOfLink(rightSide, expressionRoot);
+                            TNODE rightSide = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Constant);
+                            AST.AST.Instance.SetChildOfLink(rightSide, expressionRoot);
                         }
                     }
                     else throw new Exception("ParseAssign: Spodziewana zmienna lub stała, " + token);
@@ -351,7 +344,7 @@ namespace SPA2.Parser
             if (lineNumber == lines.Count && token != ";") throw new Exception("ParseAssign: Spodziewano się znaku ;");
 
             //łączenie tyci drzewka expresion z assign
-            tree.SetChildOfLink(expressionRoot, assignNode);
+            AST.AST.Instance.SetChildOfLink(expressionRoot, assignNode);
         }
 
 

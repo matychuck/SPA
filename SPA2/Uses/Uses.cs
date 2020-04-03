@@ -10,31 +10,44 @@ using System.Threading.Tasks;
 
 namespace SPA2.Uses
 {
-    class Uses : IUses
+    public sealed class Uses : IUses
     {
-        public ProcTable.ProcTable ProcTable { get; set; }
-        public StmtTable.StmtTable StmtTable { get; set; }
-        public VarTable.VarTable VarTable { get; set; }
+        private static Uses _instance = null;
 
+        public static Uses Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new Uses();
+                }
+                return _instance;
+            }
+        }
+        private Uses()
+        {
+
+        }
         public List<Variable> GetUsed(Statement stmt)
         {
             List<int> varIndexes = stmt.UsesList.Where(i => i.Value == true).Select(i => i.Key).ToList();
 
-            return VarTable.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
+            return VarTable.VarTable.Instance.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
         }
 
         public List<Variable> GetUsed(Procedure proc)
         {
             List<int> varIndexes = proc.ModifiesList.Where(i => i.Value == true).Select(i => i.Key).ToList();
 
-            return VarTable.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
+            return VarTable.VarTable.Instance.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
         }
 
         public List<Procedure> GetUsesForProcs(Variable var)
         {
             List<Procedure> procedures = new List<Procedure>();
 
-            foreach (Procedure procedure in ProcTable.Procedures)
+            foreach (Procedure procedure in ProcTable.ProcTable.Instance.Procedures)
             {
                 if (IsUsed(var, procedure))
                 {
@@ -49,7 +62,7 @@ namespace SPA2.Uses
         {
             List<Statement> statements = new List<Statement>();
 
-            foreach (Statement statement in StmtTable.Statements)
+            foreach (Statement statement in StmtTable.StmtTable.Instance.Statements)
             {
                 if (IsUsed(var, statement))
                 {

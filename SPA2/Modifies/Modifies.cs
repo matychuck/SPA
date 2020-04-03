@@ -10,32 +10,44 @@ using System.Threading.Tasks;
 
 namespace SPA2.Modifies
 {
-    public class Modifies : IModifies
+    public sealed class Modifies : IModifies
     {
+        private static Modifies _instance = null;
 
-        public ProcTable.ProcTable ProcTable { get; set; }
-        public StmtTable.StmtTable StmtTable { get; set; }
-        public VarTable.VarTable VarTable { get; set; }
+        public static Modifies Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new Modifies();
+                }
+                return _instance;
+            }
+        }
+        private Modifies()
+        {
 
+        }
         public List<Variable> GetModified(Statement stmt)
         {
             List<int> varIndexes = stmt.ModifiesList.Where(i => i.Value == true).Select(i => i.Key).ToList();
 
-            return VarTable.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
+            return VarTable.VarTable.Instance.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
         }
 
         public List<Variable> GetModified(Procedure proc)
         {
             List<int> varIndexes = proc.ModifiesList.Where(i => i.Value == true).Select(i => i.Key).ToList();
 
-            return VarTable.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
+            return VarTable.VarTable.Instance.Variables.Where(i => varIndexes.Contains(i.Index)).ToList();
         }
 
         public List<Procedure> GetModifiesForProcs(Variable var)
         {
             List<Procedure> procedures = new List<Procedure>();
 
-            foreach(Procedure procedure in ProcTable.Procedures)
+            foreach(Procedure procedure in ProcTable.ProcTable.Instance.Procedures)
             {
                 if (IsModified(var, procedure))
                 {
@@ -50,7 +62,7 @@ namespace SPA2.Modifies
         {
             List<Statement> statements = new List<Statement>();
 
-            foreach (Statement statement in StmtTable.Statements)
+            foreach (Statement statement in StmtTable.StmtTable.Instance.Statements)
             {
                 if (IsModified(var,statement))
                 {

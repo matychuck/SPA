@@ -9,10 +9,23 @@ using System.Threading.Tasks;
 
 namespace SPA2.StmtTable
 {
-    public class StmtTable : IStmtTable
+    public sealed class StmtTable : IStmtTable
     {
+        private static StmtTable _instance = null;
+
+        public static StmtTable Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new StmtTable();
+                }
+                return _instance;
+            }
+        }
         public List<Statement> Statements { get; set; }
-        public StmtTable()
+        private StmtTable()
         {
             Statements = new List<Statement>();
         }

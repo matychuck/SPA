@@ -8,11 +8,24 @@ using System.Threading.Tasks;
 
 namespace SPA2.VarTable
 {
-    public class VarTable : IVarTable
+    public sealed class VarTable : IVarTable
     {
+        private static VarTable _instance = null;
+
+        public static VarTable Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new VarTable();
+                }
+                return _instance;
+            }
+        }
         public List<Variable> Variables { get; set; }
 
-        public VarTable()
+        private VarTable()
         {
             Variables = new List<Variable>();
         }

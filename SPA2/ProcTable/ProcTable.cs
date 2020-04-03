@@ -8,11 +8,24 @@ using System.Threading.Tasks;
 
 namespace SPA2.ProcTable
 {
-    public class ProcTable : IProcTable
+    public sealed class ProcTable : IProcTable
     {
+        private static ProcTable _instance = null;
+
+        public static ProcTable Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ProcTable();
+                }
+                return _instance;
+            }
+        }
         public List<Procedure> Procedures { get; set; }
 
-        public ProcTable()
+        private ProcTable()
         {
             Procedures = new List<Procedure>();
         }

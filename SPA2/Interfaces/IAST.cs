@@ -21,6 +21,13 @@ namespace SPA2.Interfaces
         TNODE CreateTNode(EntityTypeEnum et);
 
         /// <summary>
+        /// Tworzenie kopii węzła
+        /// </summary>
+        /// <param name="node">Węzeł</param>
+        /// <returns>Węzeł</returns>
+        TNODE GetTNodeDeepCopy(TNODE node);
+
+        /// <summary>
         /// Ustaw główny węzeł
         /// </summary>
         /// <param name="node">Węzeł</param>
