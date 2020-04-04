@@ -222,8 +222,8 @@ namespace SPA2.AST
 
         public void SetFollows(TNODE node1, TNODE node2)
         {
-            SetLink(LinkTypeEnum.Follows, node1, node2);
-            SetPrevLink(LinkTypeEnum.Follows, node2, node1);
+            SetLink(LinkTypeEnum.Follows, node2, node1);
+            SetPrevLink(LinkTypeEnum.Follows, node1, node2);
         }
 
         public void SetLeftSibling(TNODE nodeL, TNODE nodeR)
