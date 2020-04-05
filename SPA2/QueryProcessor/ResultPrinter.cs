@@ -5,10 +5,10 @@ namespace SPA2.QueryProcessor
 {
 	public static class ResultPrinter
 	{
-		public static void Print(Dictionary<string, int[]> resultToPrint)
+		public static void Print(Dictionary<string, List<int>> resultToPrint)
 		{
 			Console.WriteLine("\n* * * RESULTS * * *");
-			foreach(KeyValuePair<string, int[]> oneVar in resultToPrint)
+			foreach(KeyValuePair<string, List<int>> oneVar in resultToPrint)
             {
 				Console.WriteLine("-------------------");
 				Console.WriteLine("{0}: ", oneVar.Key);

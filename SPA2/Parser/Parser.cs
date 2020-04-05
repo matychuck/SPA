@@ -224,11 +224,13 @@ namespace SPA2.Parser
             if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
             {
                 ProcTable.Procedure proc = ProcTable.ProcTable.Instance.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                var.Index = VarTable.VarTable.Instance.GetVarIndex(var.Name);
                 Modifies.Modifies.Instance.SetModifies(proc, var);
             }
             else
             {
                 StmtTable.Statement stmt = StmtTable.StmtTable.Instance.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                var.Index = VarTable.VarTable.Instance.GetVarIndex(var.Name);
                 Modifies.Modifies.Instance.SetModifies(stmt, var);
             }
             if (AST.AST.Instance.GetParent(node) != null) SetModifiesForFamily(AST.AST.Instance.GetParent(node), var);
@@ -239,11 +241,13 @@ namespace SPA2.Parser
             if (node.EntityTypeEnum == Enums.EntityTypeEnum.Procedure)
             {
                 ProcTable.Procedure proc = ProcTable.ProcTable.Instance.Procedures.Where(i => i.AstRoot == node).FirstOrDefault();
+                var.Index = VarTable.VarTable.Instance.GetVarIndex(var.Name);
                 Uses.Uses.Instance.SetUses(proc, var);
             }
             else
             {
                 StmtTable.Statement stmt = StmtTable.StmtTable.Instance.Statements.Where(i => i.AstRoot == node).FirstOrDefault();
+                var.Index = VarTable.VarTable.Instance.GetVarIndex(var.Name);
                 Uses.Uses.Instance.SetUses(stmt, var);
             }
             if (AST.AST.Instance.GetParent(node) != null) SetUsesForFamily(AST.AST.Instance.GetParent(node), var);

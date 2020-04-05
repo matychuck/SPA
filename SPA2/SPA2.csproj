@@ -63,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryProcessor\QueryProcessor.cs" />
     <Compile Include="QueryProcessor\QueryDataGetter.cs" />
+	<Compile Include="QueryProcessor\QueryMethodChecker.cs" />
     <Compile Include="QueryProcessor\ResultPrinter.cs" />
     <Compile Include="StmtTable\Statement.cs" />
     <Compile Include="StmtTable\StmtTable.cs" />

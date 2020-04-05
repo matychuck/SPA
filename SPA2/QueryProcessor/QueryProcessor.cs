@@ -136,5 +136,10 @@ namespace SPA2.QueryProcessor
         public static string[] GetVarToSelect() {
             return queryDetails["SELECT"];
         }
+
+        public static EntityTypeEnum GetVarEnumType(string var)
+        {
+            return vars[var];
+        }
     } 
 }
