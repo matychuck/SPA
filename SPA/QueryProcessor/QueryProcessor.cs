@@ -8,11 +8,18 @@ namespace SPA.QueryProcessor
 {
     public class QueryProcessor
     {
-        private static Dictionary<string, EntityTypeEnum> vars = new Dictionary<string, EntityTypeEnum>();
-        private static Dictionary<string, string[]> queryDetails = new Dictionary<string, string[]>();
+        private static Dictionary<string, EntityTypeEnum> vars = null;
+        private static Dictionary<string, string[]> queryDetails = null;
 
+        private static void Init()
+        {
+            vars = new Dictionary<string, EntityTypeEnum>();
+            queryDetails = new Dictionary<string, string[]>();
+
+        }
         public static void ProcessQuery(String query)
         {
+            Init();
             Console.WriteLine("QUERY:\n\t {0}", query);
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
             string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -50,7 +57,7 @@ namespace SPA.QueryProcessor
                     typeEnum = EntityTypeEnum.Variable;
                     break;
                 default:
-                     throw new System.ArgumentException("Wrong typo!");
+                     throw new System.ArgumentException("Wrong argument: \"{0}\"", varTypeAsString);
             }
 
             for(int i = 1; i < varsParts.Length; i++) {

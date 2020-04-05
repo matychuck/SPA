@@ -11,12 +11,20 @@ namespace SPA.QueryProcessor
 {
 	public static class QueryDataGetter
 	{
-		private static Dictionary<string, List<int>> variableIndexes = new Dictionary<string, List<int>>();
-		private static int Sum = -1;
-		private static bool AlgorithmNotEnd = true; 
+		private static Dictionary<string, List<int>> variableIndexes = null;
+		private static int Sum;
+		private static bool AlgorithmNotEnd; 
+
+		private static void Init()
+		{
+			AlgorithmNotEnd = true;
+			Sum = -1;
+			variableIndexes = new Dictionary<string, List<int>>();
+		}
 
 		public static void GetData()
 		{
+			Init();
 			InsertIndexesIntoVarTables();
 			Dictionary<string, string[]> queryDetails = QueryProcessor.GetQueryDetails();
 			List<string> suchThatPart = new List<string>();
