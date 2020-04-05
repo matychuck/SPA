@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPA2", "SPA2\SPA2.csproj", "{694CDD1D-54C9-4077-8C18-067A70F39BB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPA.Client", "SPA.Client\SPA.Client.csproj", "{0B3A5486-9344-44F5-811D-5F3A4FCCF416}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SPA", "SPA\SPA.csproj", "{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{694CDD1D-54C9-4077-8C18-067A70F39BB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{694CDD1D-54C9-4077-8C18-067A70F39BB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{694CDD1D-54C9-4077-8C18-067A70F39BB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{694CDD1D-54C9-4077-8C18-067A70F39BB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B3A5486-9344-44F5-811D-5F3A4FCCF416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B3A5486-9344-44F5-811D-5F3A4FCCF416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B3A5486-9344-44F5-811D-5F3A4FCCF416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B3A5486-9344-44F5-811D-5F3A4FCCF416}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
