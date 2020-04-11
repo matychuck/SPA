@@ -63,5 +63,14 @@ namespace SPA.Enums
         /// </summary>
         Statement = 10,
 
+        /// <summary>
+        /// Odejmowanie
+        /// </summary>
+        Minus = 11,
+
+        /// <summary>
+        /// Mnozenie
+        /// </summary>
+        Multiply = 12,
     }
 }
