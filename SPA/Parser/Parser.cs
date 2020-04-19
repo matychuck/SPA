@@ -423,13 +423,13 @@ namespace SPA.Parser
 
             if (lines.Count == 0 || (lines.Count == 1 && string.IsNullOrEmpty(lines[0])))
                 
-                throw new Exception("StartParse: Pusty kod");
+                throw new Exception("# StartParse: Pusty kod");
 
             int lineNumber = 0;
             int index = 0;
             int endIndex;
             string token = GetToken(lines, ref lineNumber, index, out endIndex, true);
-            if (token != "procedure") throw new Exception("StartParse: Spodziewano się słowa kluczowego procedure");
+            if (token != "procedure") throw new Exception("# StartParse: Spodziewano się słowa kluczowego procedure");
             Parse(lines, index, ref lineNumber, out endIndex, "", null);
 
 
