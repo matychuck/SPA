@@ -438,7 +438,7 @@ namespace SPA.Parser
             //łączenie tyci drzewka expresion z assign
             AST.AST.Instance.SetChildOfLink(expressionRoot, assignNode);
         }
-        
+
         /// <summary>
         /// Parsowanie expr z gramatyki
         /// </summary>
@@ -447,12 +447,15 @@ namespace SPA.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public void ParseExpr(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
+        /// <returns>czy wykryto zakonczenie przypisania assign</returns>
+        public bool ParseExpr(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE parent)
         {
+            bool endAssign=false; // czy wykryto zakonczenie assign
             string token = "";
             endIndex = startIndex;
             bool expectedOperation = false; // czy spodziewane jest dzialanie: +, -, *, ()
             bool possibleBracketClose = false; // czy mozliwy jest )
+            bool bracketsPaired = true; // czy nawiasy sa parami
             int tokenCount = 0; // liczba wczytanych tokenow
             while (lineNumber < lines.Count)
             {
@@ -465,21 +468,27 @@ namespace SPA.Parser
                     switch (token)
                     {
                         case "+":
-                            
+
+                            expectedOperation = false;
                             break;
                         case "-":
-                            
+
+                            expectedOperation = false;
                             break;
                         case "*":
-                            
+
+                            expectedOperation = false;
                             break;
                         case ")":
                             if (!possibleBracketClose) throw new Exception("ParseExpr: niespodziewany znak ), linia: "+lineNumber);
-                            return;
+
+
+                            bracketsPaired = true;
+                            expectedOperation = true;
+                            break;
                         default:
-                            throw new Exception("ParseAssign: Nieobsługiwane działanie, " + token+", linia: "+lineNumber);
-                    }
-                    expectedOperation = false;
+                            throw new Exception("ParseExpr: Nieobsługiwane działanie, " + token+", linia: "+lineNumber);
+                    } 
                 }
                 else // factor z gramatyki
                 {
@@ -500,28 +509,37 @@ namespace SPA.Parser
                         if (tokenCount == 1)
                         {
                             possibleBracketClose = true;
+                            bracketsPaired = false;
                             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
                             startIndex = endIndex;
                         }
                         else
                         {
                             // parsowanie po (
-                            ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, null);
+                            endAssign = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, null);
                             startIndex = endIndex;
                             expectedOperation = true;
+                            if (endAssign)
+                            {
+                                token = ";";
+                                break;
+                            }
                         }
                     }
-                    else throw new Exception("ParseAssign: Spodziewana zmienna lub stała, " + token + ", linia: " +lineNumber);
+                    else throw new Exception("ParseExpr: Spodziewana zmienna lub stała, " + token + ", linia: " +lineNumber);
                 }
 
                 token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
                 if (token == ";")
                 {
+                    if(!bracketsPaired) throw new Exception("ParseExpr: Brak nawiasu zamykajacego, wystapil " + token + ", linia: " + lineNumber);
                     token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
+                    endAssign = true;
                     break;
                 }
             }
-            if (lineNumber == lines.Count && token != ";") throw new Exception("ParseAssign: Spodziewano się znaku ; linia: "+lineNumber);
+            if (lineNumber == lines.Count && token != ";") throw new Exception("ParseExpr: Spodziewano się znaku ; linia: "+lineNumber);
+            return endAssign;
         }
 
         /// <summary>
