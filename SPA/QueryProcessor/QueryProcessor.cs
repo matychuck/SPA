@@ -29,6 +29,7 @@ namespace SPA.QueryProcessor
 
             String selectPart = queryParts[queryParts.Length - 1];
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
+            //PrintParsingResults();
             return QueryDataGetter.GetData();
         }
 
@@ -88,6 +89,25 @@ namespace SPA.QueryProcessor
                     words[j] = words[j].Trim();
                 }
                 queryDetails.Add(dictKeys[i], words);
+            }
+        }
+
+        private static void PrintParsingResults()
+        {
+            Console.WriteLine("QUERY VARIABLES:");
+            foreach (KeyValuePair<string, EntityTypeEnum> oneVar in vars)
+            {
+                Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
+            }
+
+            foreach (KeyValuePair<string, string[]> oneDetail in queryDetails)
+            {
+                Console.WriteLine("{0}:", oneDetail.Key);
+                foreach (string word in oneDetail.Value)
+                {
+                    Console.WriteLine("\t\"{0}\"", word);
+                }
+
             }
         }
 

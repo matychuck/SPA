@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPA.Client", "SPA.Client\SP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SPA", "SPA\SPA.csproj", "{DE63DFEA-CA85-4900-8E03-552BAECBCF1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPATests", "SPATests\SPATests.csproj", "{51ED2F65-1E8E-4EC5-96A8-A1139429A8B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SPATests", "SPATests\SPATests.csproj", "{51ED2F65-1E8E-4EC5-96A8-A1139429A8B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPAPipeTester", "SPAPipeTester\SPAPipeTester.csproj", "{2162E9B0-6206-40CC-A380-C275F07E860C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{51ED2F65-1E8E-4EC5-96A8-A1139429A8B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51ED2F65-1E8E-4EC5-96A8-A1139429A8B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51ED2F65-1E8E-4EC5-96A8-A1139429A8B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2162E9B0-6206-40CC-A380-C275F07E860C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2162E9B0-6206-40CC-A380-C275F07E860C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2162E9B0-6206-40CC-A380-C275F07E860C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2162E9B0-6206-40CC-A380-C275F07E860C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
