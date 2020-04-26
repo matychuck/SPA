@@ -16,6 +16,7 @@ namespace SPA.AST
 
         public TNODE(EntityTypeEnum entityTypeEnum)
         {
+            Attr = new ATTR();
             PrevLinks = new List<LINK>();
             Links = new List<LINK>();
             EntityTypeEnum = entityTypeEnum;
@@ -23,10 +24,10 @@ namespace SPA.AST
 
         public TNODE(TNODE node)
         {
-            this.Attr = node.Attr;
             this.Links = node.Links;
             this.PrevLinks = node.PrevLinks;
             this.EntityTypeEnum = node.EntityTypeEnum;
+            this.Attr = node.Attr;
         }
     }
 }
