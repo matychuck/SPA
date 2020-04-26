@@ -72,5 +72,10 @@ namespace SPA.Enums
         /// Mnozenie
         /// </summary>
         Multiply = 12,
+
+        /// <summary>
+        /// Dzielenie
+        /// </summary>
+        Divide = 13,
     }
 }
