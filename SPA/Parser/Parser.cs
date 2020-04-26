@@ -794,7 +794,7 @@ namespace SPA.Parser
 
             if (lines.Count == 0 || (lines.Count == 1 && string.IsNullOrEmpty(lines[0])))
                 
-                throw new Exception("StartParse: Pusty kod");
+                throw new Exception("# StartParse: Pusty kod");
 
             int lineNumber = 0;
             int index = 0;
