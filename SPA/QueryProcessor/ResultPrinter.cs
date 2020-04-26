@@ -5,25 +5,29 @@ namespace SPA.QueryProcessor
 {
 	public static class ResultPrinter
 	{
-		public static void Print(Dictionary<string, List<int>> resultToPrint)
+		public static List<int> Print(Dictionary<string, List<int>> resultToPrint)
 		{
-			Console.WriteLine("\n* * * RESULTS * * *");
+            List<int> results = new List<int>();
+            int i = 0;
 			foreach(KeyValuePair<string, List<int>> oneVar in resultToPrint)
             {
-				Console.WriteLine("-------------------");
-				Console.WriteLine("{0}: ", oneVar.Key);
 				foreach(int codeLine in oneVar.Value)
                 {
-					PrintCodeLine(codeLine);
+                    i++;
+					results.Add(PrintCodeLine(codeLine, i == resultToPrint.Count));
                 }
 
             }
 
+            return results;
+
 		}
 
-		private static void PrintCodeLine(int number)
+		private static int PrintCodeLine(int number, bool lastResult)
         {
-			Console.WriteLine(">>>> {0}", number);
+            if(lastResult) Console.Write("{0}", number);
+            else Console.Write("{0},", number);
+            return number;
         }
 	}
 

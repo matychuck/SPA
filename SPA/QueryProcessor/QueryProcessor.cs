@@ -17,10 +17,9 @@ namespace SPA.QueryProcessor
             queryDetails = new Dictionary<string, string[]>();
 
         }
-        public static void ProcessQuery(String query)
+        public static List<int> ProcessQuery(String query)
         {
             Init();
-            Console.WriteLine("QUERY:\n\t {0}", query);
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
             string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -30,8 +29,8 @@ namespace SPA.QueryProcessor
 
             String selectPart = queryParts[queryParts.Length - 1];
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
-            PrintParsingResults();
-            QueryDataGetter.GetData();
+            //PrintParsingResults();
+            return QueryDataGetter.GetData();
         }
 
         private static void DecodeVarDefinitionAndInsertToDict(String varsDefinition)
@@ -57,7 +56,7 @@ namespace SPA.QueryProcessor
                     typeEnum = EntityTypeEnum.Variable;
                     break;
                 default:
-                     throw new System.ArgumentException("Wrong argument: \"{0}\"", varTypeAsString);
+                     throw new System.ArgumentException("# Wrong argument: \"{0}\"", varTypeAsString);
             }
 
             for(int i = 1; i < varsParts.Length; i++) {
@@ -93,18 +92,18 @@ namespace SPA.QueryProcessor
             }
         }
 
-
         private static void PrintParsingResults()
         {
             Console.WriteLine("QUERY VARIABLES:");
-            foreach (KeyValuePair<string, EntityTypeEnum> oneVar in vars){
+            foreach (KeyValuePair<string, EntityTypeEnum> oneVar in vars)
+            {
                 Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
             }
 
             foreach (KeyValuePair<string, string[]> oneDetail in queryDetails)
             {
                 Console.WriteLine("{0}:", oneDetail.Key);
-                foreach(string word in oneDetail.Value)
+                foreach (string word in oneDetail.Value)
                 {
                     Console.WriteLine("\t\"{0}\"", word);
                 }

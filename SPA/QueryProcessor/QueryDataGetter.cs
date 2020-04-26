@@ -22,7 +22,7 @@ namespace SPA.QueryProcessor
 			variableIndexes = new Dictionary<string, List<int>>();
 		}
 
-		public static void GetData()
+		public static List<int> GetData()
 		{
 			Init();
 			InsertIndexesIntoVarTables();
@@ -31,7 +31,9 @@ namespace SPA.QueryProcessor
 			try
             {
 				suchThatPart = new List<string>(queryDetails["SUCH THAT"]);
-			} catch(Exception) { };
+			} catch(Exception e) {
+                Console.WriteLine("#" + e.Message);
+            };
 
 			//Algorithm here...
 			if(suchThatPart.Count > 0)
@@ -47,7 +49,7 @@ namespace SPA.QueryProcessor
 				} while(AlgorithmNotEnd);
 
 			//After algorithm....
-			SendDataToPrint();
+			return SendDataToPrint();
 		}
 
 		private static void InsertIndexesIntoVarTables()
@@ -90,7 +92,7 @@ namespace SPA.QueryProcessor
 						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Statement));
 						break;
 					default:
-						throw new System.ArgumentException("Wrong typo!");
+						throw new System.ArgumentException("# Wrong typo!");
 				}
 			}
 		}
@@ -155,7 +157,7 @@ namespace SPA.QueryProcessor
 					indexes.Add(StmtTable.StmtTable.Instance.GetStmt(Int32.Parse(stmtNr[0])).CodeLine);
 				} catch (Exception e)
 				{
-					throw new ArgumentException("Wrong stmt# = '{0}'", stmtNr[0]);
+					throw new ArgumentException("# Wrong stmt# = '{0}'", stmtNr[0]);
 				}
 			}
 				
@@ -163,7 +165,7 @@ namespace SPA.QueryProcessor
 			return indexes;
 		}
 
-		private static void SendDataToPrint()
+		private static List<int> SendDataToPrint()
         {
 			string[] varsToSelect = QueryProcessor.GetVarToSelect();
 			Dictionary<string, List<int>> varIndexesToPrint = new Dictionary<string, List<int>>();
@@ -173,7 +175,7 @@ namespace SPA.QueryProcessor
 				varIndexesToPrint.Add(trimedVar, variableIndexes[trimedVar]);
             }
 
-			ResultPrinter.Print(varIndexesToPrint);
+			return ResultPrinter.Print(varIndexesToPrint);
 		}
 
 		private static void CheckSum()
@@ -213,7 +215,7 @@ namespace SPA.QueryProcessor
 					QueryMethodChecker.CheckParentOrFollows(typeAndArguments[1], typeAndArguments[2], AST.AST.Instance.IsFollowedStar);
 					break;
 				default:
-					throw new ArgumentException("Niepoprawna metoda: \"{0}\"", typeAndArguments[0]);
+					throw new ArgumentException("# Niepoprawna metoda: \"{0}\"", typeAndArguments[0]);
             }
 		}
 
