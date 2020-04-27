@@ -69,6 +69,27 @@ namespace SPA.QueryProcessor
         {
             string[] separatingStrings = { "select", "such that", "with" };
             string[] separatedQuery = selectPart.ToLower().Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
+            if(separatedQuery.Length == 3)
+            {
+                int withStartIndex = selectPart.ToLower().IndexOf("with", 0);
+                separatedQuery[2] = selectPart.Substring(withStartIndex+4);
+            }
+
+            int ind1 = selectPart.ToLower().IndexOf(separatedQuery[0], 0);
+            separatedQuery[0] = selectPart.Substring(ind1, separatedQuery[0].Length);
+
+            if(separatedQuery.Length >= 2)
+            {
+                int ind2 = selectPart.ToLower().IndexOf(separatedQuery[1], 0);
+                separatedQuery[1] = selectPart.Substring(ind2, separatedQuery[1].Length);
+            }
+            if(separatedQuery.Length >= 3)
+            {
+                int ind3 = selectPart.ToLower().IndexOf(separatedQuery[2], 0);
+                separatedQuery[2] = selectPart.Substring(ind3, separatedQuery[2].Length);
+            }
+            
+
             AddQueryDetailsToDict(separatedQuery);
         }
 

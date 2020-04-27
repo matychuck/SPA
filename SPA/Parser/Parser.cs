@@ -817,6 +817,44 @@ namespace SPA.Parser
                 Parse(lines, index, ref lineNumber, out endIndex, "", newRoot);
                 index = endIndex;
             }
+            UpdateModifiesAndUsesTablesInProcedures();
+        }
+
+        public void UpdateModifiesAndUsesTablesInProcedures()
+        {
+            bool wasChange;
+            int sizeOfProcTable = ProcTable.ProcTable.Instance.GetSize();
+            do {
+                wasChange = false;
+                for(int i=0; i<sizeOfProcTable; i++)
+                {
+                    ProcTable.Procedure p1 = ProcTable.ProcTable.Instance.GetProc(i);
+                    for(int j=0; j<sizeOfProcTable; j++)
+                        {
+                            if(i != j)
+                            {
+                                ProcTable.Procedure p2 = ProcTable.ProcTable.Instance.GetProc(j);
+                                if(Calls.Calls.Instance.IsCalls(p1.Name, p2.Name))
+                                {
+                                    foreach(KeyValuePair<int, bool> variable in p2.ModifiesList)
+                                    {
+                                        if (!p1.ModifiesList.ContainsKey(variable.Key))
+                                            {
+                                                p1.ModifiesList[variable.Key] = true;
+                                                wasChange = true;
+                                            }
+                                        if (!p1.UsesList.ContainsKey(variable.Key))
+                                            {
+                                                p1.UsesList[variable.Key] = true;
+                                                wasChange = true;
+                                            }
+                                    }
+                                }
+                            }
+                            
+                        }
+                }
+            } while(wasChange);
         }
 
         public void CleanData()
