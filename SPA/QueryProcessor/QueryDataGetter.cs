@@ -22,7 +22,7 @@ namespace SPA.QueryProcessor
 			variableIndexes = new Dictionary<string, List<int>>();
 		}
 
-		public static void GetData()
+		public static List<int> GetData()
 		{
 			Init();
 			InsertIndexesIntoVarTables();
@@ -31,7 +31,9 @@ namespace SPA.QueryProcessor
 			try
             {
 				suchThatPart = new List<string>(queryDetails["SUCH THAT"]);
-			} catch(Exception) { };
+			} catch(Exception e) {
+                Console.WriteLine("#" + e.Message);
+            };
 
 			//Algorithm here...
 			if(suchThatPart.Count > 0)
@@ -47,7 +49,7 @@ namespace SPA.QueryProcessor
 				} while(AlgorithmNotEnd);
 
 			//After algorithm....
-			SendDataToPrint();
+			return SendDataToPrint();
 		}
 
 		private static void InsertIndexesIntoVarTables()
@@ -61,13 +63,13 @@ namespace SPA.QueryProcessor
 				{
 					string[] attrSplitted = entry.Key.Split(new string[] {"."}, System.StringSplitOptions.RemoveEmptyEntries);
 					if(oneVar.Key == attrSplitted[0])
-						attributes.Add(attrSplitted[1], entry.Value);
+						attributes.Add(attrSplitted[1].ToLower(), entry.Value);
 				}		
 
 				switch (oneVar.Value)
 				{
 					case EntityTypeEnum.Procedure:
-						variableIndexes.Add(oneVar.Key, GetProcedureIndexes());
+						variableIndexes.Add(oneVar.Key, GetProcedureIndexes(attributes));
 						break;
 
 					case EntityTypeEnum.Variable:
@@ -90,17 +92,30 @@ namespace SPA.QueryProcessor
 						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Statement));
 						break;
 					default:
-						throw new System.ArgumentException("Wrong typo!");
+						throw new System.ArgumentException("# Wrong typo!");
 				}
 			}
 		}
 
-		private static List<int> GetProcedureIndexes()
+		private static List<int> GetProcedureIndexes(Dictionary<string, List<string>> attributes)
 		{
 			List<int> indexes = new List<int>();
+			List<string> procName = new List<string>();
+
+			if(attributes.ContainsKey("procname"))
+				procName = attributes["procname"];
+			if(procName.Count > 1)
+				return indexes;
+
 			foreach (Procedure p in ProcTable.ProcTable.Instance.Procedures)
 			{
-				indexes.Add(p.Index);
+				if(procName.Count == 1)
+				{
+					if(p.Name == procName[0])
+						indexes.Add(p.Index);
+				}
+				else
+					indexes.Add(p.Index);
 			}
 			return indexes;
 		}
@@ -155,7 +170,7 @@ namespace SPA.QueryProcessor
 					indexes.Add(StmtTable.StmtTable.Instance.GetStmt(Int32.Parse(stmtNr[0])).CodeLine);
 				} catch (Exception e)
 				{
-					throw new ArgumentException("Wrong stmt# = '{0}'", stmtNr[0]);
+					throw new ArgumentException("# Wrong stmt# = '{0}'", stmtNr[0]);
 				}
 			}
 				
@@ -163,7 +178,7 @@ namespace SPA.QueryProcessor
 			return indexes;
 		}
 
-		private static void SendDataToPrint()
+		private static List<int> SendDataToPrint()
         {
 			string[] varsToSelect = QueryProcessor.GetVarToSelect();
 			Dictionary<string, List<int>> varIndexesToPrint = new Dictionary<string, List<int>>();
@@ -173,7 +188,7 @@ namespace SPA.QueryProcessor
 				varIndexesToPrint.Add(trimedVar, variableIndexes[trimedVar]);
             }
 
-			ResultPrinter.Print(varIndexesToPrint);
+			return ResultPrinter.Print(varIndexesToPrint);
 		}
 
 		private static void CheckSum()
@@ -212,20 +227,37 @@ namespace SPA.QueryProcessor
 				case "follows*":
 					QueryMethodChecker.CheckParentOrFollows(typeAndArguments[1], typeAndArguments[2], AST.AST.Instance.IsFollowedStar);
 					break;
+				case "calls":
+					QueryMethodChecker.CheckCalls(typeAndArguments[1], typeAndArguments[2], Calls.Calls.Instance.IsCalls);
+					break;
+				case "calls*":
+					QueryMethodChecker.CheckCalls(typeAndArguments[1], typeAndArguments[2], Calls.Calls.Instance.IsCallsStar);
+					break;
 				default:
-					throw new ArgumentException("Niepoprawna metoda: \"{0}\"", typeAndArguments[0]);
+					throw new ArgumentException("# Niepoprawna metoda: \"{0}\"", typeAndArguments[0]);
             }
 		}
 
-		public static List<int> GetArgIndexes(string var)
+		public static List<int> GetArgIndexes(string var, EntityTypeEnum type)
         {
+			if(var[0] == '\"' & var[var.Length-1] == '\"')
+			{
+				string name = var.Substring(1, var.Length-2);
+				if(type == EntityTypeEnum.Procedure)
+					return new List<int>(new int[] {ProcTable.ProcTable.Instance.GetProcIndex(name)});
+
+				else if (type == EntityTypeEnum.Variable)
+					return new List<int>(new int[] {VarTable.VarTable.Instance.GetVarIndex(name)});
+			}
 			return variableIndexes[var];
         }
 
 		public static void RemoveIndexesFromLists(string firstArgument, string secondArgument, List<int> firstList, List<int> secondList)
         {
-			variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
-			variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
+			if(!(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"'))
+				variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
+			if(!(secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+				variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
 		}
 	}
 }

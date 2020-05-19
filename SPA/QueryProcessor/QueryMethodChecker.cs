@@ -15,7 +15,11 @@ namespace SPA.QueryProcessor
                                         Func<Variable, Procedure, bool> methodForProc,
                                         Func<Variable, Statement, bool> methodForStmt)
         {
-            EntityTypeEnum firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+             EntityTypeEnum firstArgType;
+             if(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"')
+                firstArgType = EntityTypeEnum.Procedure;
+             else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
             if (firstArgType == EntityTypeEnum.Procedure)
                 CheckProcedureModifiesOrUses(firstArgument, secondArgument, methodForProc);
             else
@@ -23,9 +27,22 @@ namespace SPA.QueryProcessor
         }
 
         private static void CheckProcedureModifiesOrUses(string firstArgument, string secondArgument, Func<Variable, Procedure, bool> IsModifiedOrUsedByProc)
-        {
-            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument);
-            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument);
+        {   
+            EntityTypeEnum secondArgType;
+            EntityTypeEnum firstArgType;
+
+            if(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"')
+                firstArgType = EntityTypeEnum.Procedure;
+            else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+
+            if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Variable;
+            else
+                secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
+
+            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
+            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);
 
             List<int> procStayinIndexes = new List<int>();
             List<int> varStayinIndexes = new List<int>();
@@ -52,8 +69,16 @@ namespace SPA.QueryProcessor
 
         private static void CheckStatementModifiesOrUses(string firstArgument, string secondArgument, Func<Variable, Statement, bool> IsModifiedOrUsedByStmt)
         {
-            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument);
-            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument);
+            EntityTypeEnum secondArgType;
+            EntityTypeEnum firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+
+            if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Variable;
+            else
+                secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
+
+            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
+            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);
 
             List<int> stmtStayinIndexes = new List<int>();
             List<int> varStayinIndexes = new List<int>();
@@ -82,8 +107,8 @@ namespace SPA.QueryProcessor
             EntityTypeEnum firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
             EntityTypeEnum secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
 
-            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument);
-            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument);
+            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
+            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);
 
             List<int> firstStayinIndexes = new List<int>();
             List<int> secondStayinIndexes = new List<int>();
@@ -108,6 +133,55 @@ namespace SPA.QueryProcessor
 
         }
 
+        public static void CheckCalls(string firstArgument, string secondArgument, Func<string, string, bool> method)
+        {
+            EntityTypeEnum secondArgType;
+            EntityTypeEnum firstArgType;
+
+            if(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"')
+                firstArgType = EntityTypeEnum.Procedure;
+            else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+
+            if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Procedure;
+            else
+                secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
+
+            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
+            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);
+
+            List<int> firstStayinIndexes = new List<int>();
+            List<int> secondStayinIndexes = new List<int>();
+
+            if(firstArgType != EntityTypeEnum.Procedure)
+                throw new ArgumentException("Not a procedure: {0}", firstArgument);
+            else  if( secondArgType != EntityTypeEnum.Procedure)
+                 throw new ArgumentException("Not a procedure: {0}", secondArgument);
+
+            string first, second;
+            Procedure p1, p2;
+            foreach (int firstInd in firstArgIndexes)
+                foreach (int secondInd in secondArgIndexes)
+                {
+                    p1 = ProcTable.ProcTable.Instance.GetProc(firstInd);
+                    p2 = ProcTable.ProcTable.Instance.GetProc(secondInd);
+
+                    first = p1 == null ? "" : p1.Name;
+                    second = p2 == null ? "" : p2.Name;
+
+                    if(method(first, second))
+                    {
+                        firstStayinIndexes.Add(firstInd);
+                        secondStayinIndexes.Add(secondInd);
+                    }
+                }
+
+             QueryDataGetter.RemoveIndexesFromLists(firstArgument, secondArgument,
+                                                   firstStayinIndexes,
+                                                   secondStayinIndexes);
+        }
+
         private static TNODE GetNodeByType(EntityTypeEnum et, int ind)
         {
             TNODE node;
@@ -120,6 +194,8 @@ namespace SPA.QueryProcessor
 
             return node;
         }
+
+        
     }
 
 }
