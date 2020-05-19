@@ -234,12 +234,12 @@ namespace SPA.Parser
 
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (IsVarName(token)) {
-                //if (VarTable.VarTable.Instance.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token+", linia: "+lineNumber);
-                //else
-                //{
+                if (VarTable.VarTable.Instance.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token+", linia: "+lineNumber);
+                else
+                {
                     VarTable.Variable var = new VarTable.Variable(token);
                     SetUsesForFamily(whileNode, var);
-                //}
+                }
             }
             else throw new Exception("ParseWhile: Wymagana nazwa zmiennej, "+token+", linia: "+lineNumber);
             startIndex = endIndex;
@@ -327,8 +327,7 @@ namespace SPA.Parser
             startIndex = endIndex;
 
             // parsowanie wszystkiego po =
-            TNODE expressionRoot;
-            ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, assignNode, false, out expressionRoot);
+            TNODE expressionRoot = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, assignNode, false);
             AST.AST.Instance.SetChildOfLink(expressionRoot, assignNode);
             startIndex = endIndex;
         }
@@ -449,19 +448,18 @@ namespace SPA.Parser
         /// <param name="startIndex">indeks od którego ma zacząć czytać w danej linii</param>
         /// <param name="endIndex">indeks, na którym skończyło czytać w danej linii</param>
         /// <param name="procedureName">nazwa przetwarzanej procedury</param>
-        public bool ParseExpr(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE assignNode, TNODE parent, bool inBracket, out TNODE expressionRoot, string prevToken="")
+        public TNODE ParseExpr(List<string> lines, int startIndex, ref int lineNumber, out int endIndex, string procedureName, TNODE assignNode, TNODE parent, bool inBracket, string prevToken="")
         {
-            bool endAssign=false; // czy wykryto zakonczenie assign
+            //bool endAssign=false; // czy wykryto zakonczenie assign
             string token = "";
             endIndex = startIndex;
             bool expectedOperation = false; // czy spodziewane jest dzialanie: +, -, *, ()
-            bool possibleBracketClose = false; // czy mozliwy jest )
             int tokenCount = 0; // liczba wczytanych tokenow
             bool bracketsPaired = false;
-            expressionRoot = null; // zmienna przechowująca aktualny wierzchołek expression po prawej stronie assign
+            TNODE expressionRoot = null; // zmienna przechowująca aktualny wierzchołek expression po prawej stronie assign
             while (lineNumber < lines.Count)
             {
-                token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true); // sprawdzenie kolejnego tokena
+                //token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true); // sprawdzenie kolejnego tokena
                 tokenCount++;
                 if (expectedOperation)
                 {
@@ -495,24 +493,23 @@ namespace SPA.Parser
                             expectedOperation = false;
                             break;
                         case ")":
-                            if (!possibleBracketClose) throw new Exception("ParseExpr: niespodziewany znak ), linia: " + lineNumber);
+                            if (!inBracket) throw new Exception("ParseExpr: niespodziewany znak ), linia: " + lineNumber);
                             bracketsPaired = true;
                             expectedOperation = true;
 
                             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
-
                             if (token == "*" || token == "/")
                             {
                                 if(parent.EntityTypeEnum == Enums.EntityTypeEnum.Multiply || parent.EntityTypeEnum == Enums.EntityTypeEnum.Divide)
                                 {
                                     AST.AST.Instance.SetChildOfLink(parent, expressionRoot);
-                                    //return expressionRoot;
+                                    return expressionRoot;
                                 }
                             }
                             else
                             {
                                 AST.AST.Instance.SetChildOfLink(parent, expressionRoot);
-                                //return expressionRoot;
+                                return expressionRoot;
                             }
                             break;
                         default:
@@ -521,18 +518,18 @@ namespace SPA.Parser
                 }
                 else // factor z gramatyki
                 {
-                    //if (prevToken != "" && expressionRoot == null) token = prevToken;
-                    //else
-                    //{
-                    //    token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false); // pobranie tokena
-                    //   startIndex = endIndex;
-                    //}
+                    if (prevToken != "" && expressionRoot == null) token = prevToken;
+                    else
+                    {
+                        token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false); // pobranie tokena
+                        startIndex = endIndex;
+                    }
                     if (IsVarName(token)) // spodziewana nazwa zmiennej
                     {
                         if (expressionRoot == null) expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable);
                         else
                         {
-                            string nextToken = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
+                            string nextToken = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
                             if (nextToken == "*" || nextToken == "/")
                             {
                                 if (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply)
@@ -542,8 +539,7 @@ namespace SPA.Parser
                                 }
                                 else
                                 {
-                                    TNODE tinyTreeRoot = null;
-                                    endAssign = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, false, out tinyTreeRoot, token);
+                                    TNODE tinyTreeRoot = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, false, token);
                                     AST.AST.Instance.SetChildOfLink(tinyTreeRoot, expressionRoot);
                                 }
                             }
@@ -551,15 +547,15 @@ namespace SPA.Parser
                             {
                                 TNODE rightSide = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable);
                                 AST.AST.Instance.SetChildOfLink(rightSide, expressionRoot);
-                                //if (!inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken != ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
-                                //    return expressionRoot;
-                                //else if (inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken == ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
-                                //    return expressionRoot;
+                                if (!inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken != ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
+                                    return expressionRoot;
+                                else if (inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken == ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
+                                    return expressionRoot;
                             }
                         }
                         VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
                         SetUsesForFamily(assignNode, usesVar);
-                        startIndex = endIndex;
+
                         expectedOperation = true;
                     }
                     else if (IsConstValue(token)) // spodziewana nazwa stalej
@@ -567,7 +563,7 @@ namespace SPA.Parser
                         if (expressionRoot == null) expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Constant);
                         else
                         {
-                            string nextToken = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
+                            string nextToken = GetToken(lines, ref lineNumber, startIndex, out endIndex, true);
                             if (nextToken == "*" || nextToken == "/")
                             {
                                 if (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply)
@@ -577,8 +573,7 @@ namespace SPA.Parser
                                 }
                                 else
                                 {
-                                    TNODE tinyTreeRoot = null;
-                                    endAssign = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, false, out tinyTreeRoot, token);
+                                    TNODE tinyTreeRoot = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, false, token);
                                     AST.AST.Instance.SetChildOfLink(tinyTreeRoot, expressionRoot);
                                 }
                             }
@@ -586,41 +581,27 @@ namespace SPA.Parser
                             {
                                 TNODE rightSide = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Constant);
                                 AST.AST.Instance.SetChildOfLink(rightSide, expressionRoot);
-                                //if (!inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken != ";")
-                               //     return expressionRoot;
-                                //else if (inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken == ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
-                                //    return expressionRoot;
+                                if (!inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken != ";")
+                                    return expressionRoot;
+                                else if (inBracket && (expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Divide || expressionRoot.EntityTypeEnum == Enums.EntityTypeEnum.Multiply) && nextToken == ";" && parent.EntityTypeEnum != Enums.EntityTypeEnum.Assign)
+                                    return expressionRoot;
                             }
                         }
-                        startIndex = endIndex;
                         expectedOperation = true;
                     }
                     else if (token == "(")
                     {
-                        if (tokenCount == 1)
-                        {
-                            possibleBracketClose = true;
-                            bracketsPaired = false;
-                            token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
-                            startIndex = endIndex;
-                        }
-                        else
-                        {
-                            // parsowanie po (
-                            TNODE tinyTreeRoot;
-                            endAssign = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, true, out tinyTreeRoot);
-                            if (expressionRoot == null)
-                                expressionRoot = AST.AST.Instance.GetTNodeDeepCopy(tinyTreeRoot);
-                            startIndex = endIndex;
-                            expectedOperation = true;
-                            if (endAssign)
-                            {
-                                token = ";";
-                                break;
-                            }
-                        }
-                        
-
+                        // parsowanie po (
+                        TNODE tinyTreeRoot = ParseExpr(lines, startIndex, ref lineNumber, out endIndex, procedureName, assignNode, expressionRoot, true);
+                        if(expressionRoot == null)
+                            expressionRoot = AST.AST.Instance.GetTNodeDeepCopy(tinyTreeRoot);
+                        startIndex = endIndex;
+                        expectedOperation = true;
+                        //if (endAssign)
+                        //{
+                        //    token = ";";
+                        //    break;
+                        //}
                     }
                     else throw new Exception("ParseExpr: Spodziewana zmienna lub stała, " + token + ", linia: " +lineNumber);
                 }
@@ -630,14 +611,11 @@ namespace SPA.Parser
                 {
                     if (inBracket && !bracketsPaired) throw new Exception("ParseExpr: Brak nawiasu zamykajacego, wystapil " + token + ", linia: " + lineNumber);
                     token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
-                    endAssign = true;
-                    break;
-                    //return expressionRoot;
+                    return expressionRoot;
                 }
             }
             if (lineNumber == lines.Count && token != ";") throw new Exception("ParseExpr: Spodziewano się znaku ; linia: "+lineNumber);
-            //return expressionRoot;
-            return endAssign;
+            return expressionRoot;
         }
 
         /// <summary>
@@ -702,12 +680,12 @@ namespace SPA.Parser
             token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (IsVarName(token))
             {
-                //if (VarTable.VarTable.Instance.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token + ", linia: " + lineNumber);
-                //else
-                //{
+                if (VarTable.VarTable.Instance.GetVarIndex(token) == -1) throw new Exception("ParseAssign: Zmienna nie została przypisana, " + token + ", linia: " + lineNumber);
+                else
+                {
                     VarTable.Variable var = new VarTable.Variable(token);
                     SetUsesForFamily(ifNode, var);
-                //}
+                }
             }
             else throw new Exception("ParseIf: Wymagana nazwa zmiennej, " + token+", linia: " + lineNumber);
             startIndex = endIndex;
