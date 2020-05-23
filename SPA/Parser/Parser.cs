@@ -314,8 +314,12 @@ namespace SPA.Parser
             VarTable.VarTable.Instance.InsertVar(token);
             StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, assignNode);
             AST.AST.Instance.SetParent(assignNode, parent); //ustawianie parenta dla assign
-
-            TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
+            TNODE stmtListNode = AST.AST.Instance.GetNthChild(1, parent);
+            // czy przypadkiem nie jest to pod operacją else w ifie(drugie dziecko stmtLst istnieje)
+            if(stmtListNode == null)
+            {
+                stmtListNode = AST.AST.Instance.GetNthChild(0, parent);//istnieje tylko jedno stmtLst
+            }
             SettingFollows(assignNode, stmtListNode);
             AST.AST.Instance.SetChildOfLink(assignNode, stmtListNode); //łączenie stmlList z assign
             TNODE variableNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable); // tworzenie node dla zmiennej po lewej stronie assign node
