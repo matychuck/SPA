@@ -17,15 +17,15 @@ namespace SPA.QueryProcessor
                 
                 switch(type){
                     case EntityTypeEnum.Variable:
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
                         PrintVariables(oneVar.Value);
                         break;
                     case EntityTypeEnum.Procedure:
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
                         PrintProcedures(oneVar.Value);
                         break;
                     default: 
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + " (numbers of code line):");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + " (numbers of code line):");
                         PrintStatements(oneVar.Value);
                         break;
                 }
