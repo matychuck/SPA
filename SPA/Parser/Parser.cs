@@ -10,6 +10,8 @@ namespace SPA.Parser
 {
     public class Parser
     {
+        int lineNumberQuery = 1;
+        int lineNumberOld = 0;
         List<String> reservedWords; // lista słów kluczowych
         public Parser()
         {
@@ -68,7 +70,9 @@ namespace SPA.Parser
                 fileLine = lines.ElementAt(lineNumber);
                 if (startIndex >= fileLine.Length)
                 {
+                    addLineNumberQuery(fileLine, lineNumber);
                     lineNumber++;
+                    
                     startIndex = 0;
                     if (lineNumber >= lines.Count)
                     {
@@ -96,7 +100,9 @@ namespace SPA.Parser
                     startIndex++;
                     if (startIndex >= fileLine.Length)
                     {
+                        addLineNumberQuery(fileLine, lineNumber);
                         lineNumber++;
+                        
                         startIndex = 0;
                         if(lineNumber>=lines.Count)
                         {
@@ -218,11 +224,11 @@ namespace SPA.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (token != "while") throw new Exception("ParseWhile: Brak słowa kluczowego while, linia: "+lineNumber);
-            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.While, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.While, lineNumberQuery);
             startIndex = endIndex;
 
             TNODE whileNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.While); // tworzenie node dla while
-            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, whileNode);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, whileNode);
             AST.AST.Instance.SetParent(whileNode, parent); //ustawianie parenta dla while
 
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
@@ -306,13 +312,13 @@ namespace SPA.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (!IsVarName(token)) throw new Exception("ParseAssign: Wymagana nazwa zmiennej, " + token+", linia: "+lineNumber);
-            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumberQuery);
             startIndex = endIndex;
 
             TNODE assignNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Assign); // tworzenie node dla assign
             VarTable.Variable var = new VarTable.Variable(token);
             VarTable.VarTable.Instance.InsertVar(token);
-            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, assignNode);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, assignNode);
             AST.AST.Instance.SetParent(assignNode, parent); //ustawianie parenta dla assign
 
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
@@ -346,13 +352,13 @@ namespace SPA.Parser
         {
             string token = GetToken(lines, ref lineNumber, startIndex, out endIndex, false);
             if (!IsVarName(token)) throw new Exception("ParseAssign: Wymagana nazwa zmiennej, " + token+", linia: "+lineNumber);
-            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Assign, lineNumberQuery);
             startIndex = endIndex;
 
             TNODE assignNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Assign); // tworzenie node dla assign
             VarTable.Variable var = new VarTable.Variable(token);
             VarTable.VarTable.Instance.InsertVar(token);
-            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, assignNode);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, assignNode);
             AST.AST.Instance.SetParent(assignNode, parent); //ustawianie parenta dla assign
 
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
@@ -655,9 +661,9 @@ namespace SPA.Parser
 
             startIndex = endIndex;
 
-            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Call, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.Call, lineNumberQuery);
             TNODE callNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Call);
-            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, callNode);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, callNode);
 
             AST.AST.Instance.SetParent(callNode, parent); //ustawianie parenta dla call
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
@@ -690,9 +696,9 @@ namespace SPA.Parser
             
             startIndex = endIndex;
 
-            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.If, lineNumber);
+            StmtTable.StmtTable.Instance.InsertStmt(Enums.EntityTypeEnum.If, lineNumberQuery);
             TNODE ifNode = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.If);
-            StmtTable.StmtTable.Instance.SetAstRoot(lineNumber, ifNode);
+            StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, ifNode);
 
             AST.AST.Instance.SetParent(ifNode, parent); //ustawianie parenta dla if
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
@@ -885,6 +891,18 @@ namespace SPA.Parser
             VarTable.VarTable.Instance.Variables.Clear();
             StmtTable.StmtTable.Instance.Statements.Clear();
             ProcTable.ProcTable.Instance.Procedures.Clear();
+        }
+
+        private void addLineNumberQuery(string line, int lineNumber)
+        {
+            if (!line.Contains("procedure") || !line.Contains("else"))
+            {
+                if (lineNumber - lineNumberOld >= 1)
+                {
+                    lineNumberQuery++;
+                    lineNumberOld = lineNumber;
+                }
+            }                   
         }
     }
 }
