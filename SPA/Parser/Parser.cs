@@ -670,7 +670,8 @@ namespace SPA.Parser
             StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, callNode);
 
             AST.AST.Instance.SetParent(callNode, parent); //ustawianie parenta dla call
-            TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
+            TNODE stmtListNode = AST.AST.Instance.GetLinkedNodes(parent, Enums.LinkTypeEnum.Child)
+                .Where(i => i.EntityTypeEnum == Enums.EntityTypeEnum.Stmtlist).FirstOrDefault();
             SettingFollows(callNode, stmtListNode); //setting follows
             AST.AST.Instance.SetChildOfLink(callNode, stmtListNode);
 
