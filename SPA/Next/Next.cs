@@ -33,7 +33,8 @@ namespace SPA.Next
             List<Statement> nextStatements = new List<Statement>();
             var astNode = statement.AstRoot;
             var previousFollow = AST.AST.Instance.GetPrevLinkedNodes(astNode, LinkTypeEnum.Follows).FirstOrDefault();
-            if (previousFollow != null)
+            //jezeli nastęnik nie jest pusty i nie jest ifem -> bo if przechodzi do dzieci 
+            if (previousFollow != null && astNode.EntityTypeEnum != EntityTypeEnum.If)
             {
                 var nextStatement = StmtTable.StmtTable.Instance.Statements.Where(i => i.AstRoot == previousFollow).FirstOrDefault();
                 nextStatements.Add(nextStatement);
