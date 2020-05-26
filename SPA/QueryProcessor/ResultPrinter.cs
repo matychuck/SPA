@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using SPA.Enums;
 using SPA.VarTable;
 using SPA.ProcTable;
+using System.Linq;
+
 namespace SPA.QueryProcessor
 {
 	public static class ResultPrinter
@@ -11,6 +13,18 @@ namespace SPA.QueryProcessor
 		{
             List<int> results = new List<int>();
             int i = 0;
+            //check boolean
+            /*
+            if(resultToPrint.ContainsKey("BOOLEAN"))
+                if(resultToPrint["BOOLEAN"].Count > 0)
+                {
+                    Console.WriteLine("\n\tTRUE\n");
+                    return new List<int>(new int[] {1});
+                } else {
+                    Console.WriteLine("\n\tFALSE\n");
+                    return new List<int>(new int[] {1});
+                } */
+
 			foreach(KeyValuePair<string, List<int>> oneVar in resultToPrint)
             {   
                 EntityTypeEnum type = QueryProcessor.GetVarEnumType(oneVar.Key);

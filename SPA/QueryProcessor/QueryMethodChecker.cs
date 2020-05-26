@@ -18,6 +18,8 @@ namespace SPA.QueryProcessor
              EntityTypeEnum firstArgType;
              if(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"')
                 firstArgType = EntityTypeEnum.Procedure;
+             else if(int.TryParse(firstArgument, out _))
+                firstArgType = EntityTypeEnum.Statement;
              else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
             if (firstArgType == EntityTypeEnum.Procedure)
@@ -70,7 +72,12 @@ namespace SPA.QueryProcessor
         private static void CheckStatementModifiesOrUses(string firstArgument, string secondArgument, Func<Variable, Statement, bool> IsModifiedOrUsedByStmt)
         {
             EntityTypeEnum secondArgType;
-            EntityTypeEnum firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+            EntityTypeEnum firstArgType;
+
+            if(int.TryParse(firstArgument, out _))
+                firstArgType = EntityTypeEnum.Statement;
+            else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
 
             if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
                 secondArgType = EntityTypeEnum.Variable;
@@ -104,8 +111,17 @@ namespace SPA.QueryProcessor
 
         public static void CheckParentOrFollows(string firstArgument, string secondArgument, Func<TNODE, TNODE, bool> method)
         {
-            EntityTypeEnum firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
-            EntityTypeEnum secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
+            EntityTypeEnum firstArgType;
+            EntityTypeEnum secondArgType;
+            if(int.TryParse(firstArgument, out _))
+                firstArgType = EntityTypeEnum.Statement;
+            else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+            
+            if(int.TryParse(secondArgument, out _))
+                secondArgType = EntityTypeEnum.Statement;
+            else
+                secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
 
             List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
             List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);

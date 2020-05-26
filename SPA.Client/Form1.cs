@@ -63,7 +63,7 @@ namespace SPA.Client
                 Console.WriteLine(RUN_ERROR);
                 Console.WriteLine(ex.Message);
                 errorRangeText.Add(richTextBox2.Text.Trim().Length - ex.Message.Trim().Length - RUN_ERROR.Trim().Length - 3, richTextBox2.Text.Length);
-              
+                Console.WriteLine(ex.StackTrace);
 
 
             }

@@ -75,12 +75,24 @@ namespace SPA.Modifies
 
         public bool IsModified(Variable var, Statement stat)
         {
-            return stat.ModifiesList.TryGetValue(var.Index, out bool value) && value;
+            bool flag = false;
+            try
+            {
+                if(stat!=null)
+                    flag = stat.ModifiesList.TryGetValue(var.Index, out bool value) && value;
+            } catch (Exception e) {}
+            return flag;
         }
 
         public bool IsModified(Variable var, Procedure proc)
         {
-            return proc.ModifiesList.TryGetValue(var.Index, out bool value) && value;
+            bool flag = false;
+            try
+            {
+                if(proc!=null)
+                    flag = proc.ModifiesList.TryGetValue(var.Index, out bool value) && value;
+            } catch (Exception e) {}
+            return flag;
         }
 
         public void SetModifies(Statement stmt, Variable var)
