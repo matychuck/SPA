@@ -28,7 +28,7 @@ namespace SPA.Client
         public Form1()
         {
             InitializeComponent();
-            Parser = new Parser.Parser();
+            //Parser = new Parser.Parser();
             ControlWriter controlWriter = new ControlWriter(richTextBox2);
             Console.SetOut(controlWriter);
         }
@@ -70,6 +70,7 @@ namespace SPA.Client
         }
         private void CompileCode()
         {
+            Parser = new Parser.Parser();
             try
             {
                 //Console.WriteLine(COMPILE_START);
