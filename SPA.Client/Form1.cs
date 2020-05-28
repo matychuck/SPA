@@ -82,7 +82,7 @@ namespace SPA.Client
                 //Console.WriteLine(COMPILE_ERROR);
                 Console.WriteLine(ex.Message);
                 errorRangeText.Add(richTextBox2.Text.Trim().Length - ex.Message.Trim().Length - COMPILE_ERROR.Trim().Length - 3, richTextBox2.Text.Length);
-
+                Console.WriteLine(ex.StackTrace);
 
 
             }
@@ -93,7 +93,7 @@ namespace SPA.Client
             richTextBox2.Text = "";
             
             CompileCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
 
         }
 
@@ -101,7 +101,7 @@ namespace SPA.Client
         {
             richTextBox2.Text = "";
             RunCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
         }
 
         private void runWithCompileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -109,7 +109,7 @@ namespace SPA.Client
             richTextBox2.Text = "";
             CompileCode();
             RunCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
         }
 
         private void ChangeErrorColor()
