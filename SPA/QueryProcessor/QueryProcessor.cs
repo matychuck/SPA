@@ -129,12 +129,12 @@ namespace SPA.QueryProcessor
             }
 
 
-            foreach(KeyValuePair<string, List<string>> item in queryDetails){
-                Console.WriteLine(item.Key);
-                foreach (string s in item.Value)
-                    Console.WriteLine("\t" + s);
+            //foreach(KeyValuePair<string, List<string>> item in queryDetails){
+            //    Console.WriteLine(item.Key);
+            //    foreach (string s in item.Value)
+            //        Console.WriteLine("\t" + s);
 
-            }
+            //}
             /*string[] separatingStrings = { "select", "such that", "with" };
             string[] separatedQuery = selectPart.ToLower().Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
             if(separatedQuery.Length == 3)

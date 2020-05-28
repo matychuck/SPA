@@ -31,15 +31,15 @@ namespace SPA.QueryProcessor
                 
                 switch(type){
                     case EntityTypeEnum.Variable:
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
                         PrintVariables(oneVar.Value);
                         break;
                     case EntityTypeEnum.Procedure:
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
                         PrintProcedures(oneVar.Value);
                         break;
                     default: 
-                        Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + " (numbers of code line):");
+                        //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + " (numbers of code line):");
                         PrintStatements(oneVar.Value);
                         break;
                 }
@@ -65,25 +65,57 @@ namespace SPA.QueryProcessor
 
         private static void PrintVariables(List<int> indexes)
         {
-            foreach(int index in indexes)
+            if(indexes.Count != 0)
             {
-                Console.Write("\t{0}\n", VarTable.VarTable.Instance.GetVar(index).Name);
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Console.Write("{0}", VarTable.VarTable.Instance.GetVar(indexes[i]).Name);
+                    if (i < indexes.Count - 1)
+                    {
+                        Console.Write(",");
+                    }
+                }
+            } else
+            {
+                Console.Write("none");
             }
         }
 
         private static void PrintProcedures(List<int> indexes)
         {
-            foreach(int index in indexes)
+            if (indexes.Count != 0)
             {
-                Console.Write("\t{0}()\n", ProcTable.ProcTable.Instance.GetProc(index).Name);
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Console.Write("{0}", ProcTable.ProcTable.Instance.GetProc(indexes[i]).Name);
+                    if (i < indexes.Count - 1)
+                    {
+                        Console.Write(",");
+                    }
+                }
+            }
+            else
+            {
+                Console.Write("none");
             }
         }
 
         private static void PrintStatements(List<int> indexes)
         {
-            foreach(int index in indexes)
+            if (indexes.Count != 0)
             {
-                Console.Write("\t{0}\n", index);
+                for (int i = 0; i < indexes.Count; i++)
+                {
+                    Console.Write("{0}", indexes[i]);
+                    if (i < indexes.Count - 1)
+                    {
+                        Console.Write(",");
+                    }
+                }
+            }
+            else
+            {
+                Console.Write("none");
             }
         }
 	}
