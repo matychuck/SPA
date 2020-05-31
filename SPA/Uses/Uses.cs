@@ -75,12 +75,16 @@ namespace SPA.Uses
 
         public bool IsUsed(Variable var, Statement stat)
         {
-            return stat.UsesList.TryGetValue(var.Index, out bool value) && value;
+            if(var != null & stat != null)
+                return stat.UsesList.TryGetValue(var.Index, out bool value) && value;
+            return false;
         }
 
         public bool IsUsed(Variable var, Procedure proc)
         {
-            return proc.UsesList.TryGetValue(var.Index,out bool value) && value;
+            if(var != null & proc != null)
+                return proc.UsesList.TryGetValue(var.Index,out bool value) && value;
+            return false;
         }
 
         public void SetUses(Statement stmt, Variable var)
