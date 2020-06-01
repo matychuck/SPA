@@ -22,7 +22,7 @@ namespace SPA.QueryProcessor
 			variableIndexes = new Dictionary<string, List<int>>();
 		}
 
-		public static List<int> GetData()
+		public static List<string> GetData(bool testing)
 		{
 			Init();
 			InsertIndexesIntoVarTables();
@@ -50,7 +50,7 @@ namespace SPA.QueryProcessor
 			}
 
 			//After algorithm....
-			return SendDataToPrint();
+			return SendDataToPrint(testing);
 		}
 
 		private static void InsertIndexesIntoVarTables()
@@ -208,7 +208,7 @@ namespace SPA.QueryProcessor
 			return indexes;
 		}
 
-		private static List<int> SendDataToPrint()
+		private static List<string> SendDataToPrint(bool testing)
         {
 			List<string> varsToSelect = QueryProcessor.GetVarToSelect();
 			Dictionary<string, List<int>> varIndexesToPrint = new Dictionary<string, List<int>>();
@@ -225,7 +225,7 @@ namespace SPA.QueryProcessor
 				}
 			}
 
-			return ResultPrinter.Print(varIndexesToPrint);
+			return ResultPrinter.Print(varIndexesToPrint, testing);
 		}
 
 		private static void CheckSum()

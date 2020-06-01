@@ -9,10 +9,11 @@ namespace SPA.QueryProcessor
 {
 	public static class ResultPrinter
 	{
-		public static List<int> Print(Dictionary<string, List<int>> resultToPrint)
+		public static List<string> Print(Dictionary<string, List<int>> resultToPrint, bool testing)
 		{
-            List<int> results = new List<int>();
-            int i = 0;
+              List<string> results = new List<string>();
+            //List<int> results = new List<int>();
+            //int i = 0;
             //check boolean
             /*
             if(resultToPrint.ContainsKey("BOOLEAN"))
@@ -29,28 +30,30 @@ namespace SPA.QueryProcessor
             {   
                 EntityTypeEnum type = QueryProcessor.GetVarEnumType(oneVar.Key);
                 
+                
                 switch(type){
                     case EntityTypeEnum.Variable:
                         //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
-                        PrintVariables(oneVar.Value);
+                        results.AddRange(PrintVariables(oneVar.Value));
                         break;
                     case EntityTypeEnum.Procedure:
                         //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + ": ");
-                        PrintProcedures(oneVar.Value);
+                        results.AddRange(PrintProcedures(oneVar.Value));
                         break;
                     default: 
                         //Console.WriteLine("Results for " + type.ToString().ToLower() + " " + oneVar.Key + " (numbers of code line):");
-                        PrintStatements(oneVar.Value);
+                        results.AddRange(PrintStatements(oneVar.Value));
                         break;
-                }
+                } 
 
-				foreach(int codeLine in oneVar.Value)
+				/*foreach(int codeLine in oneVar.Value)
                 {
                     i++;
 					results.Add(codeLine);
-                }
-
+                } */
             }
+            if(!testing)
+                    Console.WriteLine(string.Join(", ", results));
 
             return results;
 
@@ -63,60 +66,70 @@ namespace SPA.QueryProcessor
             return number;
         }
 
-        private static void PrintVariables(List<int> indexes)
+        private static List<string>PrintVariables(List<int> indexes)
         {
+            List<string> results = new List<string>();
             if(indexes.Count != 0)
             {
                 for (int i = 0; i < indexes.Count; i++)
                 {
-                    Console.Write("{0}", VarTable.VarTable.Instance.GetVar(indexes[i]).Name);
+                    results.Add( VarTable.VarTable.Instance.GetVar(indexes[i]).Name);
+                    /*Console.Write("{0}", VarTable.VarTable.Instance.GetVar(indexes[i]).Name);
                     if (i < indexes.Count - 1)
                     {
                         Console.Write(",");
-                    }
+                    }*/
                 }
-            } else
+            } 
+            /*else
             {
                 Console.Write("none");
-            }
+            }*/
+            return results;
         }
 
-        private static void PrintProcedures(List<int> indexes)
+        private static List<string> PrintProcedures(List<int> indexes)
         {
+            List<string> results = new List<string>();
             if (indexes.Count != 0)
             {
                 for (int i = 0; i < indexes.Count; i++)
                 {
-                    Console.Write("{0}", ProcTable.ProcTable.Instance.GetProc(indexes[i]).Name);
+                    results.Add(ProcTable.ProcTable.Instance.GetProc(indexes[i]).Name);
+                  /*  Console.Write("{0}", ProcTable.ProcTable.Instance.GetProc(indexes[i]).Name);
                     if (i < indexes.Count - 1)
                     {
                         Console.Write(",");
-                    }
+                    } */
                 }
             }
-            else
+           /* else
             {
                 Console.Write("none");
-            }
+            } */
+            return results;
         }
 
-        private static void PrintStatements(List<int> indexes)
+        private static List<string> PrintStatements(List<int> indexes)
         {
+            List<string> results = new List<string>();
             if (indexes.Count != 0)
             {
                 for (int i = 0; i < indexes.Count; i++)
                 {
-                    Console.Write("{0}", indexes[i]);
+                    results.Add(indexes[i].ToString());
+                  /*  Console.Write("{0}", indexes[i]);
                     if (i < indexes.Count - 1)
                     {
                         Console.Write(",");
-                    }
+                    } */
                 }
             }
-            else
+            /*else
             {
                 Console.Write("none");
-            }
+            } */
+            return results;
         }
 	}
 

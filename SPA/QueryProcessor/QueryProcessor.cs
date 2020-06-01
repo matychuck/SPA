@@ -17,7 +17,7 @@ namespace SPA.QueryProcessor
             queryDetails = new Dictionary<string, List<string>>();
 
         }
-        public static List<int> ProcessQuery(String query)
+        public static List<string> ProcessQuery(String query, bool testing=false)
         {
             Init();
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
@@ -30,7 +30,7 @@ namespace SPA.QueryProcessor
             String selectPart = queryParts[queryParts.Length - 1];
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
             //PrintParsingResults();
-            return QueryDataGetter.GetData();
+            return QueryDataGetter.GetData(testing);
         }
 
         private static void DecodeVarDefinitionAndInsertToDict(String varsDefinition)

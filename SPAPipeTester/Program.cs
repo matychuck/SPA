@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,17 +16,31 @@ namespace SPAPipeTester
         static void Main(string[] args)
         {
             try
-            {
+            {             
                 string SimpleCode = File.ReadAllText(args[0]); //pobieranie nazwy pliku z kodem simple
                 SimpleCode = Regex.Replace(SimpleCode, @"\r", ""); // usunięcie nowej lini
                 Parser Parser = new Parser();
                 Parser.CleanData();
                 Parser.StartParse(SimpleCode);
                 Console.WriteLine("Ready"); //informacja dla PipeTestera, że może wprowadzać zapytania PQL
-                string variables = Console.ReadLine();
-                string query = Console.ReadLine();
-                string PQL = variables + query;
-                QueryProcessor.ProcessQuery(PQL);
+
+                string variables;
+                string query;
+                string PQL;
+                List<string> results;
+
+                while(true){
+                     variables = Console.ReadLine();
+                     query = Console.ReadLine();
+                     PQL = variables + query;
+                     results = QueryProcessor.ProcessQuery(PQL, testing: true);
+                     if(results.Count == 0)
+                        Console.WriteLine("none");
+                     else
+                     {
+                        Console.WriteLine(string.Join(", ", results));
+                     }
+                }
             }
             catch (Exception e)
             {
