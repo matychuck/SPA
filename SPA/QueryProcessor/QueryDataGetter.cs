@@ -95,6 +95,9 @@ namespace SPA.QueryProcessor
 					case EntityTypeEnum.Prog_line:
 						variableIndexes.Add(oneVar.Key, GetProglineIndexes(attributes));
 						break;
+					case EntityTypeEnum.Constant:
+						variableIndexes.Add(oneVar.Key, GetConstantIndexes(attributes));
+						break;
 					default:
 						throw new System.ArgumentException("# Wrong typo!");
 				}
@@ -170,6 +173,36 @@ namespace SPA.QueryProcessor
             }
 
 			return indexes;
+		}
+
+		private static List<int> GetConstantIndexes(Dictionary<string, List<string>> attributes)
+		{
+			List<int> indexes = new List<int>();
+			List<string> constantV = new List<string>();
+
+			if(attributes.ContainsKey("value"))
+				constantV = attributes["value"];
+			if(constantV.Count > 1)
+				return indexes;
+			
+			if(constantV.Count == 1)
+				if(! int.TryParse(constantV[0], out _))
+					return indexes;
+
+			foreach(Statement stmt in StmtTable.StmtTable.Instance.Statements)
+            {
+				TNODE node = stmt.AstRoot;
+				List<int> consts = AST.AST.Instance.GetConstants(node);
+				if(constantV.Count == 1)
+				{
+					if(consts.Contains(Int32.Parse(constantV[0])))
+						indexes.Add(Int32.Parse(constantV[0]));
+				}
+				else
+					indexes.AddRange(consts);
+            }
+
+			return indexes.Distinct().ToList();
 		}
 
 		private static List<int> GetStatementIndexes(Dictionary<string, List<string>> attributes, EntityTypeEnum enumType)
@@ -269,6 +302,12 @@ namespace SPA.QueryProcessor
 					break;
 				case "calls*":
 					QueryMethodChecker.CheckCalls(typeAndArguments[1], typeAndArguments[2], Calls.Calls.Instance.IsCallsStar);
+					break;
+				case "next":
+					QueryMethodChecker.CheckNext(typeAndArguments[1], typeAndArguments[2], Next.Next.Instance.IsNext);
+					break;
+				case "next*":
+					QueryMethodChecker.CheckNext(typeAndArguments[1], typeAndArguments[2], Next.Next.Instance.IsNextStar);
 					break;
 				default:
 					throw new ArgumentException(string.Format("# Niepoprawna metoda: \"{0}\"", typeAndArguments[0]));

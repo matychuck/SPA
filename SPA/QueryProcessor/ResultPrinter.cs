@@ -53,7 +53,10 @@ namespace SPA.QueryProcessor
                 } */
             }
             if(!testing)
+                if(results.Count > 0)
                     Console.WriteLine(string.Join(", ", results));
+                else
+                    Console.WriteLine("none");
 
             return results;
 

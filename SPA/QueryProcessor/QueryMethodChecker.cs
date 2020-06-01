@@ -198,6 +198,42 @@ namespace SPA.QueryProcessor
                                                    secondStayinIndexes);
         }
 
+        public static void CheckNext(string firstArgument, string secondArgument, Func<int, int, bool> method)
+        {
+            EntityTypeEnum firstArgType;
+            EntityTypeEnum secondArgType;
+            if(int.TryParse(firstArgument, out _))
+                firstArgType = EntityTypeEnum.Prog_line;
+            else
+                firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+            
+            if(int.TryParse(secondArgument, out _))
+                secondArgType = EntityTypeEnum.Prog_line;
+            else
+                secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
+
+            List<int> firstArgIndexes = QueryDataGetter.GetArgIndexes(firstArgument, firstArgType);
+            List<int> secondArgIndexes = QueryDataGetter.GetArgIndexes(secondArgument, secondArgType);
+
+            List<int> firstStayinIndexes = new List<int>();
+            List<int> secondStayinIndexes = new List<int>();
+
+            foreach (int firstInd in firstArgIndexes)
+                foreach (int secondInd in secondArgIndexes)
+                {
+                    if(method(firstInd, secondInd))
+                    {
+                        firstStayinIndexes.Add(firstInd);
+                        secondStayinIndexes.Add(secondInd);
+                    }
+                }
+
+             QueryDataGetter.RemoveIndexesFromLists(firstArgument, secondArgument,
+                                                   firstStayinIndexes,
+                                                   secondStayinIndexes);
+
+        }
+
         private static TNODE GetNodeByType(EntityTypeEnum et, int ind)
         {
             TNODE node;
