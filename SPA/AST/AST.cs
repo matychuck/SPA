@@ -275,6 +275,25 @@ namespace SPA.AST
             Root = node;
         }
 
+        public List<int> GetConstants(TNODE node)
+        {
+            List<int> constans = new List<int>();
+            List<TNODE> childs = GetLinkedNodes(node, LinkTypeEnum.Child);
+            if(childs != null)
+                if(childs.Count > 1)
+                    foreach(TNODE child in childs)
+                    {
+                        if(child.EntityTypeEnum == EntityTypeEnum.Constant)
+                        {
+                            //int value = Int32.Parse(child.Attr.Name);
+                            int value = Int32.Parse("0");
+                            constans.Add(value);
+                        }
+                        else
+                            constans.AddRange(GetConstants(child));
+                    }
+            return constans.Distinct().ToList();
+        }
 
         
     }

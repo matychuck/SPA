@@ -77,5 +77,10 @@ namespace SPA.Enums
         /// Dzielenie
         /// </summary>
         Divide = 13,
+
+        /// <summary>
+        /// Linia kodu
+        /// </summary>
+        Prog_line = 14,
     }
 }

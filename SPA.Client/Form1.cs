@@ -28,7 +28,7 @@ namespace SPA.Client
         public Form1()
         {
             InitializeComponent();
-            Parser = new Parser.Parser();
+            //Parser = new Parser.Parser();
             ControlWriter controlWriter = new ControlWriter(richTextBox2);
             Console.SetOut(controlWriter);
         }
@@ -55,34 +55,35 @@ namespace SPA.Client
         {
             try
             {
-                Console.WriteLine(RUN_START);
+                //Console.WriteLine(RUN_START);
                 QueryProcessor.QueryProcessor.ProcessQuery(richTextBox3.Text);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(RUN_ERROR);
+                //Console.WriteLine(RUN_ERROR);
                 Console.WriteLine(ex.Message);
                 errorRangeText.Add(richTextBox2.Text.Trim().Length - ex.Message.Trim().Length - RUN_ERROR.Trim().Length - 3, richTextBox2.Text.Length);
-              
+                Console.WriteLine(ex.StackTrace);
 
 
             }
         }
         private void CompileCode()
         {
+            Parser = new Parser.Parser();
             try
             {
-                Console.WriteLine(COMPILE_START);
+                //Console.WriteLine(COMPILE_START);
                 Parser.CleanData();
                 Parser.StartParse(richTextBox1.Text);
-                Console.WriteLine(COMPILE_END);
+                //Console.WriteLine(COMPILE_END);
             }
             catch(Exception ex)
             {
-                Console.WriteLine(COMPILE_ERROR);
+                //Console.WriteLine(COMPILE_ERROR);
                 Console.WriteLine(ex.Message);
                 errorRangeText.Add(richTextBox2.Text.Trim().Length - ex.Message.Trim().Length - COMPILE_ERROR.Trim().Length - 3, richTextBox2.Text.Length);
-
+                Console.WriteLine(ex.StackTrace);
 
 
             }
@@ -93,7 +94,7 @@ namespace SPA.Client
             richTextBox2.Text = "";
             
             CompileCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
 
         }
 
@@ -101,7 +102,7 @@ namespace SPA.Client
         {
             richTextBox2.Text = "";
             RunCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
         }
 
         private void runWithCompileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -109,7 +110,7 @@ namespace SPA.Client
             richTextBox2.Text = "";
             CompileCode();
             RunCode();
-            ChangeErrorColor();
+           // ChangeErrorColor();
         }
 
         private void ChangeErrorColor()

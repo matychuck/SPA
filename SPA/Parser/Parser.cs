@@ -320,7 +320,6 @@ namespace SPA.Parser
             VarTable.VarTable.Instance.InsertVar(token);
             StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, assignNode);
             AST.AST.Instance.SetParent(assignNode, parent); //ustawianie parenta dla assign
-
             TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
             SettingFollows(assignNode, stmtListNode);
             AST.AST.Instance.SetChildOfLink(assignNode, stmtListNode); //łączenie stmlList z assign
@@ -672,7 +671,8 @@ namespace SPA.Parser
             StmtTable.StmtTable.Instance.SetAstRoot(lineNumberQuery, callNode);
 
             AST.AST.Instance.SetParent(callNode, parent); //ustawianie parenta dla call
-            TNODE stmtListNode = AST.AST.Instance.GetNthChild(0, parent);
+            TNODE stmtListNode = AST.AST.Instance.GetLinkedNodes(parent, Enums.LinkTypeEnum.Child)
+                .Where(i => i.EntityTypeEnum == Enums.EntityTypeEnum.Stmtlist).FirstOrDefault();
             SettingFollows(callNode, stmtListNode); //setting follows
             AST.AST.Instance.SetChildOfLink(callNode, stmtListNode);
 

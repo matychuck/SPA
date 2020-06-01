@@ -22,11 +22,11 @@ namespace SPA.QueryProcessor
 			variableIndexes = new Dictionary<string, List<int>>();
 		}
 
-		public static List<int> GetData()
+		public static List<string> GetData(bool testing)
 		{
 			Init();
 			InsertIndexesIntoVarTables();
-			Dictionary<string, string[]> queryDetails = QueryProcessor.GetQueryDetails();
+			Dictionary<string, List<string>> queryDetails = QueryProcessor.GetQueryDetails();
 			List<string> suchThatPart = new List<string>();
 			try
             {
@@ -36,10 +36,10 @@ namespace SPA.QueryProcessor
             };
 
 			//Algorithm here...
-			if(suchThatPart.Count > 0)
+			if(suchThatPart.Count > 0) {
+				suchThatPart = SortSuchThatPart(suchThatPart);
 				do
 				{
-					
 					foreach(string method in suchThatPart)
 					{
 						if(method.Length > 0)
@@ -47,9 +47,10 @@ namespace SPA.QueryProcessor
 					}
 					CheckSum();
 				} while(AlgorithmNotEnd);
+			}
 
 			//After algorithm....
-			return SendDataToPrint();
+			return SendDataToPrint(testing);
 		}
 
 		private static void InsertIndexesIntoVarTables()
@@ -90,6 +91,12 @@ namespace SPA.QueryProcessor
 
 					case EntityTypeEnum.Statement:
 						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Statement));
+						break;
+					case EntityTypeEnum.Prog_line:
+						variableIndexes.Add(oneVar.Key, GetProglineIndexes(attributes));
+						break;
+					case EntityTypeEnum.Constant:
+						variableIndexes.Add(oneVar.Key, GetConstantIndexes(attributes));
 						break;
 					default:
 						throw new System.ArgumentException("# Wrong typo!");
@@ -144,6 +151,60 @@ namespace SPA.QueryProcessor
 			return indexes;
 		}
 
+		private static List<int> GetProglineIndexes(Dictionary<string, List<string>> attributes)
+		{
+			List<int> indexes = new List<int>();
+			List<string> procLine = new List<string>();
+
+			if(attributes.ContainsKey("value"))
+				procLine = attributes["value"];
+			if(procLine.Count > 1)
+				return indexes;
+			
+			foreach(Statement stmt in StmtTable.StmtTable.Instance.Statements)
+            {
+				if(procLine.Count == 1)
+				{
+					if(stmt.CodeLine.ToString() == procLine[0])
+						indexes.Add(stmt.CodeLine);
+				}
+				else
+					indexes.Add(stmt.CodeLine);
+            }
+
+			return indexes;
+		}
+
+		private static List<int> GetConstantIndexes(Dictionary<string, List<string>> attributes)
+		{
+			List<int> indexes = new List<int>();
+			List<string> constantV = new List<string>();
+
+			if(attributes.ContainsKey("value"))
+				constantV = attributes["value"];
+			if(constantV.Count > 1)
+				return indexes;
+			
+			if(constantV.Count == 1)
+				if(! int.TryParse(constantV[0], out _))
+					return indexes;
+
+			foreach(Statement stmt in StmtTable.StmtTable.Instance.Statements)
+            {
+				TNODE node = stmt.AstRoot;
+				List<int> consts = AST.AST.Instance.GetConstants(node);
+				if(constantV.Count == 1)
+				{
+					if(consts.Contains(Int32.Parse(constantV[0])))
+						indexes.Add(Int32.Parse(constantV[0]));
+				}
+				else
+					indexes.AddRange(consts);
+            }
+
+			return indexes.Distinct().ToList();
+		}
+
 		private static List<int> GetStatementIndexes(Dictionary<string, List<string>> attributes, EntityTypeEnum enumType)
 		{
 			List<int> indexes = new List<int>();
@@ -167,10 +228,12 @@ namespace SPA.QueryProcessor
 			{
 				try
 				{
-					indexes.Add(StmtTable.StmtTable.Instance.GetStmt(Int32.Parse(stmtNr[0])).CodeLine);
+					Statement s = StmtTable.StmtTable.Instance.GetStmt(Int32.Parse(stmtNr[0]));
+					if(s != null)
+						indexes.Add(s.CodeLine);
 				} catch (Exception e)
 				{
-					throw new ArgumentException("# Wrong stmt# = '{0}'", stmtNr[0]);
+					throw new ArgumentException(string.Format("# Wrong stmt# = {0}", stmtNr[0]));
 				}
 			}
 				
@@ -178,17 +241,24 @@ namespace SPA.QueryProcessor
 			return indexes;
 		}
 
-		private static List<int> SendDataToPrint()
+		private static List<string> SendDataToPrint(bool testing)
         {
-			string[] varsToSelect = QueryProcessor.GetVarToSelect();
+			List<string> varsToSelect = QueryProcessor.GetVarToSelect();
 			Dictionary<string, List<int>> varIndexesToPrint = new Dictionary<string, List<int>>();
 			foreach(string var in varsToSelect)
             {
 				string trimedVar = var.Trim();
-				varIndexesToPrint.Add(trimedVar, variableIndexes[trimedVar]);
-            }
+				try
+				{
+					varIndexesToPrint.Add(trimedVar, variableIndexes[trimedVar]);
+				}
+				catch(Exception e)
+				{
+					throw new ArgumentException(string.Format("# Wrong argument: \"{0}\"", trimedVar));
+				}
+			}
 
-			return ResultPrinter.Print(varIndexesToPrint);
+			return ResultPrinter.Print(varIndexesToPrint, testing);
 		}
 
 		private static void CheckSum()
@@ -233,8 +303,14 @@ namespace SPA.QueryProcessor
 				case "calls*":
 					QueryMethodChecker.CheckCalls(typeAndArguments[1], typeAndArguments[2], Calls.Calls.Instance.IsCallsStar);
 					break;
+				case "next":
+					QueryMethodChecker.CheckNext(typeAndArguments[1], typeAndArguments[2], Next.Next.Instance.IsNext);
+					break;
+				case "next*":
+					QueryMethodChecker.CheckNext(typeAndArguments[1], typeAndArguments[2], Next.Next.Instance.IsNextStar);
+					break;
 				default:
-					throw new ArgumentException("# Niepoprawna metoda: \"{0}\"", typeAndArguments[0]);
+					throw new ArgumentException(string.Format("# Niepoprawna metoda: \"{0}\"", typeAndArguments[0]));
             }
 		}
 
@@ -249,15 +325,26 @@ namespace SPA.QueryProcessor
 				else if (type == EntityTypeEnum.Variable)
 					return new List<int>(new int[] {VarTable.VarTable.Instance.GetVarIndex(name)});
 			}
+
+			if(int.TryParse(var, out _))
+				return new List<int>(new int[] {Int32.Parse(var)});
 			return variableIndexes[var];
         }
 
 		public static void RemoveIndexesFromLists(string firstArgument, string secondArgument, List<int> firstList, List<int> secondList)
         {
 			if(!(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"'))
-				variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
+				if(!(int.TryParse(firstArgument, out _)))
+					variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
 			if(!(secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
-				variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
+				if(!(int.TryParse(secondArgument, out _)))
+					variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
+		}
+
+		private static List<string> SortSuchThatPart(List<string> stp){
+			List<string> newstp = stp.OrderBy(x => x.Contains("\"")).ToList();
+			newstp.Reverse();
+			return newstp;
 		}
 	}
 }

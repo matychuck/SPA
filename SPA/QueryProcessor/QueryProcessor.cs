@@ -9,15 +9,15 @@ namespace SPA.QueryProcessor
     public class QueryProcessor
     {
         private static Dictionary<string, EntityTypeEnum> vars = null;
-        private static Dictionary<string, string[]> queryDetails = null;
+        private static Dictionary<string, List<string>> queryDetails = null;
 
         private static void Init()
         {
             vars = new Dictionary<string, EntityTypeEnum>();
-            queryDetails = new Dictionary<string, string[]>();
+            queryDetails = new Dictionary<string, List<string>>();
 
         }
-        public static List<int> ProcessQuery(String query)
+        public static List<string> ProcessQuery(String query, bool testing=false)
         {
             Init();
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
@@ -30,7 +30,7 @@ namespace SPA.QueryProcessor
             String selectPart = queryParts[queryParts.Length - 1];
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
             //PrintParsingResults();
-            return QueryDataGetter.GetData();
+            return QueryDataGetter.GetData(testing);
         }
 
         private static void DecodeVarDefinitionAndInsertToDict(String varsDefinition)
@@ -55,8 +55,14 @@ namespace SPA.QueryProcessor
                 case "variable":
                     typeEnum = EntityTypeEnum.Variable;
                     break;
+                case "constant":
+                    typeEnum = EntityTypeEnum.Constant;
+                    break;
+                case "prog_line":
+                    typeEnum = EntityTypeEnum.Prog_line;
+                    break;
                 default:
-                     throw new System.ArgumentException("# Wrong argument: \"{0}\"", varTypeAsString);
+                     throw new System.ArgumentException(string.Format("# Wrong argument: \"{0}\"", varTypeAsString));
             }
 
             for(int i = 1; i < varsParts.Length; i++) {
@@ -66,8 +72,70 @@ namespace SPA.QueryProcessor
         }
 
         private static void ProcessSelectPart(string selectPart)
-        {
-            string[] separatingStrings = { "select", "such that", "with" };
+        {  
+            //string selectPart = "Select s, V,  b such that Modifies(s,V) and Uses(s,V) with s.stmt#=3 such that Follows(s, a) with V.varname=\"aBc\"";
+            string[] splittedselectPart = Regex.Split(selectPart.ToLower(), "(such that)");
+            List<string[]> splittedselectPart2 = new List<string[]>();
+            List<string> splittedselectPart3 = new List<string>();
+            List<string> splittedselectPart4 = new List<string>();
+            queryDetails.Add("SELECT", new List<string>());
+            queryDetails.Add("SUCH THAT", new List<string>());
+            queryDetails.Add("WITH", new List<string>());
+            
+
+            foreach (string s in splittedselectPart)
+                splittedselectPart2.Add(Regex.Split(s, "(with)"));
+
+            foreach (string[] ss in splittedselectPart2)
+                foreach (string s in ss)
+                    splittedselectPart3.Add(s);
+
+            splittedselectPart4.Add(splittedselectPart3[0]);
+            for (int i = 1; i < splittedselectPart3.Count; i += 2)
+                splittedselectPart4.Add(splittedselectPart3[i] + splittedselectPart3[i + 1]);
+
+
+            foreach (string s in splittedselectPart4)
+            {
+              //  Console.WriteLine(s);
+              //  Console.WriteLine(selectPart.ToLower().IndexOf(s));
+                int index = selectPart.ToLower().IndexOf(s);
+              //  Console.WriteLine(selectPart.Substring(index, s.Length));
+              //  Console.WriteLine("=================");
+                string substring;
+                string[] substrings;
+                string[] separator = { " and ", " And ", " ANd ", " AND ", " anD ", " aND ", " aNd ", " AnD " };
+                if (s.StartsWith("such that"))
+                {
+                    substring = selectPart.Substring(index, s.Length).Substring(9).Trim();
+                    substrings = substring.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sbs in substrings)
+                        queryDetails["SUCH THAT"].Add(sbs.Trim());
+                }
+                else if (s.StartsWith("with"))
+                {
+                    substring = selectPart.Substring(index, s.Length).Substring(4).Trim();
+                    substrings = substring.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sbs in substrings)
+                        queryDetails["WITH"].Add(sbs.Trim());
+                }
+                else if (s.StartsWith("select"))
+                {
+                    substring = selectPart.Substring(index, s.Length).Substring(6).Trim();
+                    substrings = substring.Split(',');
+                    foreach (string sbs in substrings)
+                        queryDetails["SELECT"].Add(sbs.Trim());
+                }
+            }
+
+
+            //foreach(KeyValuePair<string, List<string>> item in queryDetails){
+            //    Console.WriteLine(item.Key);
+            //    foreach (string s in item.Value)
+            //        Console.WriteLine("\t" + s);
+
+            //}
+            /*string[] separatingStrings = { "select", "such that", "with" };
             string[] separatedQuery = selectPart.ToLower().Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
             if(separatedQuery.Length == 3)
             {
@@ -90,9 +158,9 @@ namespace SPA.QueryProcessor
             }
             
 
-            AddQueryDetailsToDict(separatedQuery);
+            AddQueryDetailsToDict(separatedQuery);*/
         }
-
+        /*
         private static void AddQueryDetailsToDict(string[] separatedQuery)
         {
             string[] dictKeys = { "SELECT", "SUCH THAT", "WITH" };
@@ -104,14 +172,14 @@ namespace SPA.QueryProcessor
             
             for(int i = 1; i < separatedQuery.Length; i++)
             {
-                string[] words = separatedQuery[i].Split(new string[] { "and", }, System.StringSplitOptions.RemoveEmptyEntries);
+                string[] words = separatedQuery[i].Split(new string[] { " and ", }, System.StringSplitOptions.RemoveEmptyEntries);
                 for(int j = 0; j < words.Length; j++)
                 {
                     words[j] = words[j].Trim();
                 }
                 queryDetails.Add(dictKeys[i], words);
             }
-        }
+        } */
 
         private static void PrintParsingResults()
         {
@@ -121,7 +189,7 @@ namespace SPA.QueryProcessor
                 Console.WriteLine("\t{0} - {1}", oneVar.Key, oneVar.Value);
             }
 
-            foreach (KeyValuePair<string, string[]> oneDetail in queryDetails)
+            foreach (KeyValuePair<string, List<string>> oneDetail in queryDetails)
             {
                 Console.WriteLine("{0}:", oneDetail.Key);
                 foreach (string word in oneDetail.Value)
@@ -137,7 +205,7 @@ namespace SPA.QueryProcessor
             return vars;
         }
 
-        public static Dictionary<string, string[]> GetQueryDetails()
+        public static Dictionary<string, List<string>> GetQueryDetails()
         {
             return queryDetails;
         }
@@ -160,13 +228,20 @@ namespace SPA.QueryProcessor
             return varAttributes;
         }
 
-        public static string[] GetVarToSelect() {
+        public static List<string> GetVarToSelect() {
             return queryDetails["SELECT"];
         }
 
         public static EntityTypeEnum GetVarEnumType(string var)
         {
-            return vars[var];
+            try
+            {
+                return vars[var];
+            }
+            catch(Exception e)
+            {
+                throw new ArgumentException(string.Format("# Wrong argument: \"{0}\"", var));
+            }
         }
     } 
 }
