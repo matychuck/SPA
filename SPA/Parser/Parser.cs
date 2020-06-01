@@ -535,6 +535,7 @@ namespace SPA.Parser
                     //}
                     if (IsVarName(token)) // spodziewana nazwa zmiennej
                     {
+                        Console.WriteLine(startIndex + endIndex);
                         if (expressionRoot == null) expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Variable);
                         else
                         {
@@ -564,12 +565,17 @@ namespace SPA.Parser
                             }
                         }
                         VarTable.Variable usesVar = new VarTable.Variable(token); // ustawianie Uses
+                        if(VarTable.VarTable.Instance.GetVarIndex(token) == -1)
+                        {
+                            VarTable.VarTable.Instance.InsertVar(token);
+                        }
                         SetUsesForFamily(assignNode, usesVar);
                         startIndex = endIndex;
                         expectedOperation = true;
                     }
                     else if (IsConstValue(token)) // spodziewana nazwa stalej
                     {
+                        Console.WriteLine(startIndex + endIndex);
                         if (expressionRoot == null) expressionRoot = AST.AST.Instance.CreateTNode(Enums.EntityTypeEnum.Constant);
                         else
                         {
