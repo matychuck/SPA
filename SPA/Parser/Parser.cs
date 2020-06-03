@@ -901,7 +901,7 @@ namespace SPA.Parser
 
         private void addLineNumberQuery(string line, int lineNumber)
         {
-            if (!line.Contains("procedure") || !line.Contains("else"))
+            if (!line.Contains("procedure") && !line.Contains("else"))
             {
                 if (lineNumber - lineNumberOld >= 1)
                 {
