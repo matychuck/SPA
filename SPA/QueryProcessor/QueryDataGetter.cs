@@ -88,7 +88,9 @@ namespace SPA.QueryProcessor
 					case EntityTypeEnum.While:
 						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.While));
 						break;
-
+					case EntityTypeEnum.Call:
+						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Call));
+						break;
 					case EntityTypeEnum.Statement:
 						variableIndexes.Add(oneVar.Key, GetStatementIndexes(attributes, EntityTypeEnum.Statement));
 						break;

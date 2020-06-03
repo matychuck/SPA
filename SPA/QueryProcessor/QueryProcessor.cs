@@ -61,6 +61,12 @@ namespace SPA.QueryProcessor
                 case "prog_line":
                     typeEnum = EntityTypeEnum.Prog_line;
                     break;
+                case "if":
+                    typeEnum = EntityTypeEnum.If;
+                    break;
+                case "call":
+                    typeEnum = EntityTypeEnum.Call;
+                    break;
                 default:
                      throw new System.ArgumentException(string.Format("# Wrong argument: \"{0}\"", varTypeAsString));
             }
