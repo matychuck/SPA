@@ -116,11 +116,13 @@ namespace SPA.QueryProcessor
 			if(procName.Count > 1)
 				return indexes;
 
+			char[] charsToTrim = {'"',};
+
 			foreach (Procedure p in ProcTable.ProcTable.Instance.Procedures)
 			{
 				if(procName.Count == 1)
 				{
-					if(p.Name == procName[0])
+					if(p.Name == procName[0].Trim(charsToTrim))
 						indexes.Add(p.Index);
 				}
 				else
@@ -139,11 +141,13 @@ namespace SPA.QueryProcessor
 			if(varName.Count > 1)
 				return indexes;
 			
+			char[] charsToTrim = {'"',};
+
 			foreach(Variable v in VarTable.VarTable.Instance.Variables)
             {
 				if(varName.Count == 1)
 				{
-					if(v.Name == varName[0])
+					if(v.Name == varName[0].Trim(charsToTrim))
 						indexes.Add(v.Index);
 				}
 				else
@@ -318,6 +322,9 @@ namespace SPA.QueryProcessor
 
 		public static List<int> GetArgIndexes(string var, EntityTypeEnum type)
         {
+			if(var == "_")
+				return GetAllArgIndexes(type);
+
 			if(var[0] == '\"' & var[var.Length-1] == '\"')
 			{
 				string name = var.Substring(1, var.Length-2);
@@ -333,14 +340,34 @@ namespace SPA.QueryProcessor
 			return variableIndexes[var];
         }
 
+		public static List<int> GetAllArgIndexes(EntityTypeEnum type)
+		{
+			List<int> result = new List<int>();
+			if(type == EntityTypeEnum.Variable)
+				foreach(Variable v in VarTable.VarTable.Instance.Variables)
+					result.Add(v.Index);
+
+			else if(type == EntityTypeEnum.Procedure)
+				foreach(Procedure p in ProcTable.ProcTable.Instance.Procedures)
+					result.Add(p.Index);
+			else
+				foreach(Statement s in StmtTable.StmtTable.Instance.Statements)
+					result.Add(s.CodeLine);
+
+			return result;
+		}
+
 		public static void RemoveIndexesFromLists(string firstArgument, string secondArgument, List<int> firstList, List<int> secondList)
         {
-			if(!(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"'))
-				if(!(int.TryParse(firstArgument, out _)))
-					variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
-			if(!(secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
-				if(!(int.TryParse(secondArgument, out _)))
-					variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
+
+			if(firstArgument != "_")
+				if(!(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"'))
+					if(!(int.TryParse(firstArgument, out _)))
+						variableIndexes[firstArgument] = variableIndexes[firstArgument].Where(i => firstList.Any(j => j == i)).Distinct().ToList();
+			if(secondArgument != "_")
+				if(!(secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+					if(!(int.TryParse(secondArgument, out _)))
+						variableIndexes[secondArgument] = variableIndexes[secondArgument].Where(i => secondList.Any(j => j == i)).Distinct().ToList();
 		}
 
 		private static List<string> SortSuchThatPart(List<string> stp){

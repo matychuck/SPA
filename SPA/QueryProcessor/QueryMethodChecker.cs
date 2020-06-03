@@ -20,8 +20,11 @@ namespace SPA.QueryProcessor
                 firstArgType = EntityTypeEnum.Procedure;
              else if(int.TryParse(firstArgument, out _))
                 firstArgType = EntityTypeEnum.Statement;
+             else if(firstArgument == "_")
+                firstArgType = EntityTypeEnum.Statement;
              else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
+
             if (firstArgType == EntityTypeEnum.Procedure)
                 CheckProcedureModifiesOrUses(firstArgument, secondArgument, methodForProc);
             else
@@ -39,6 +42,8 @@ namespace SPA.QueryProcessor
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
 
             if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Variable;
+            else if(secondArgument == "_")
                 secondArgType = EntityTypeEnum.Variable;
             else
                 secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
@@ -76,10 +81,14 @@ namespace SPA.QueryProcessor
 
             if(int.TryParse(firstArgument, out _))
                 firstArgType = EntityTypeEnum.Statement;
+            else if(firstArgument == "_")
+                firstArgType = EntityTypeEnum.Statement;
             else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
 
             if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Variable;
+            else if(secondArgument == "_")
                 secondArgType = EntityTypeEnum.Variable;
             else
                 secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
@@ -115,10 +124,14 @@ namespace SPA.QueryProcessor
             EntityTypeEnum secondArgType;
             if(int.TryParse(firstArgument, out _))
                 firstArgType = EntityTypeEnum.Statement;
+            else if(firstArgument == "_")
+                firstArgType = EntityTypeEnum.Statement;
             else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
             
             if(int.TryParse(secondArgument, out _))
+                secondArgType = EntityTypeEnum.Statement;
+            else if(secondArgument == "_")
                 secondArgType = EntityTypeEnum.Statement;
             else
                 secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
@@ -156,10 +169,14 @@ namespace SPA.QueryProcessor
 
             if(firstArgument[0] == '\"' & firstArgument[firstArgument.Length-1] == '\"')
                 firstArgType = EntityTypeEnum.Procedure;
+            else if(firstArgument == "_")
+                firstArgType = EntityTypeEnum.Procedure;
             else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
 
             if((secondArgument[0] == '\"' & secondArgument[secondArgument.Length-1] == '\"'))
+                secondArgType = EntityTypeEnum.Procedure;
+            else if(secondArgument == "_")
                 secondArgType = EntityTypeEnum.Procedure;
             else
                 secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
@@ -204,10 +221,14 @@ namespace SPA.QueryProcessor
             EntityTypeEnum secondArgType;
             if(int.TryParse(firstArgument, out _))
                 firstArgType = EntityTypeEnum.Prog_line;
+            else if(firstArgument == "_")
+                firstArgType = EntityTypeEnum.Prog_line;
             else
                 firstArgType = QueryProcessor.GetVarEnumType(firstArgument);
             
             if(int.TryParse(secondArgument, out _))
+                secondArgType = EntityTypeEnum.Prog_line;
+            else if(secondArgument == "_")
                 secondArgType = EntityTypeEnum.Prog_line;
             else
                 secondArgType = QueryProcessor.GetVarEnumType(secondArgument);
