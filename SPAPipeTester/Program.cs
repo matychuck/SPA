@@ -16,7 +16,7 @@ namespace SPAPipeTester
         static void Main(string[] args)
         {
             try
-            {             
+            {           
                 string SimpleCode = File.ReadAllText(args[0]); //pobieranie nazwy pliku z kodem simple
                 SimpleCode = Regex.Replace(SimpleCode, @"\r", ""); // usunięcie nowej lini
                 Parser Parser = new Parser();
@@ -44,8 +44,8 @@ namespace SPAPipeTester
             }
             catch (Exception e)
             {
-                Console.WriteLine("# " + e.Message);
-            }
+                //Console.WriteLine("Error");
+            } 
         }
     }
 }

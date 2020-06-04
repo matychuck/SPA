@@ -21,6 +21,8 @@ namespace SPA.QueryProcessor
         {
             Init();
             query = Regex.Replace(query, @"\t|\n|\r", ""); //usunięcie znaków przejścia do nowej linii i tabulatorów
+            
+
             string[] queryParts = query.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
            for(int i = 0; i < queryParts.Length - 1; i++){
@@ -28,9 +30,33 @@ namespace SPA.QueryProcessor
             }
 
             String selectPart = queryParts[queryParts.Length - 1];
+            List<string> errors = CheckQuery(selectPart.ToLower());
+            if(errors.Count > 0)
+                return errors;
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
             //PrintParsingResults();
             return QueryDataGetter.GetData(testing);
+        }
+
+        public static List<string> CheckQuery(string query)
+        {
+            List<string> errors = new List<string>();
+            if(query.Contains("boolean"))
+                errors.Add("BOOLEAN not supported");
+            else if(query.Contains("affects"))
+                errors.Add("Affects not supported");
+            else if(query.Contains("pattern"))
+                errors.Add("Pattern not supported");
+
+            if(errors.Count > 0)
+                return errors;
+
+            String[] spearator = { "such that", "with" };
+            String[] strlist = query.Split(spearator, StringSplitOptions.RemoveEmptyEntries);
+            if(strlist[0].Contains(","))
+                errors.Add("Tuple not supported");
+
+            return errors;
         }
 
         private static void DecodeVarDefinitionAndInsertToDict(String varsDefinition)
@@ -130,7 +156,7 @@ namespace SPA.QueryProcessor
                     substring = selectPart.Substring(index, s.Length).Substring(6).Trim();
                     substrings = substring.Split(',');
                     foreach (string sbs in substrings)
-                        queryDetails["SELECT"].Add(sbs.Trim());
+                        queryDetails["SELECT"].Add(sbs.Trim().Trim( new Char[] {'<', '>' } ));
                 }
             }
 

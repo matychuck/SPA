@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SPA.AST;
+using SPA.ProcTable;
+using SPA.StmtTable;
 
 namespace SPA.Parser
 {
@@ -871,24 +873,37 @@ namespace SPA.Parser
                                 if(Calls.Calls.Instance.IsCalls(p1.Name, p2.Name))
                                 {
                                     foreach(KeyValuePair<int, bool> variable in p2.ModifiesList)
-                                    {
                                         if (!p1.ModifiesList.ContainsKey(variable.Key))
                                             {
                                                 p1.ModifiesList[variable.Key] = true;
                                                 wasChange = true;
                                             }
+                                    
+                                    foreach(KeyValuePair<int, bool> variable in p2.UsesList)
                                         if (!p1.UsesList.ContainsKey(variable.Key))
                                             {
                                                 p1.UsesList[variable.Key] = true;
                                                 wasChange = true;
                                             }
-                                    }
+                                    
                                 }
                             }
                             
                         }
                 }
             } while(wasChange);
+
+            foreach(Statement s in StmtTable.StmtTable.Instance.Statements)
+                if(s.Type == Enums.EntityTypeEnum.Call)
+                {
+                    string pname = s.AstRoot.Attr.Name;
+                    Procedure p = ProcTable.ProcTable.Instance.GetProc(pname);
+                    if(p!=null)
+                    {
+                        s.ModifiesList = p.ModifiesList;
+                        s.UsesList = p.UsesList;
+                    }
+                }
         }
 
         public void CleanData()

@@ -119,7 +119,9 @@ namespace SPA.Next
         public bool IsNext(int line1, int line2)
         {
             var stmt = StmtTable.StmtTable.Instance.GetStmt(line1);
-            return GetNext(stmt).Any(i => i.CodeLine == line2);
+            if(stmt != null)
+                return GetNext(stmt).Any(i => i.CodeLine == line2);
+            return false;
         }
 
         public bool IsNextStar(int line1, int line2)
