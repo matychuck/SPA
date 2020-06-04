@@ -246,6 +246,10 @@ namespace SPA.Parser
                 //else
                 //{
                     VarTable.Variable var = new VarTable.Variable(token);
+                    if (VarTable.VarTable.Instance.GetVarIndex(token) == -1)
+                    {
+                        VarTable.VarTable.Instance.InsertVar(token);
+                    }
                     SetUsesForFamily(whileNode, var);
                 //}
             }
@@ -720,6 +724,10 @@ namespace SPA.Parser
                 //else
                 //{
                     VarTable.Variable var = new VarTable.Variable(token);
+                    if (VarTable.VarTable.Instance.GetVarIndex(token) == -1)
+                    {
+                        VarTable.VarTable.Instance.InsertVar(token);
+                    }
                     SetUsesForFamily(ifNode, var);
                 //}
             }
