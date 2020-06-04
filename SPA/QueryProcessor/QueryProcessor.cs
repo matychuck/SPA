@@ -30,12 +30,21 @@ namespace SPA.QueryProcessor
             }
 
             String selectPart = queryParts[queryParts.Length - 1];
-            List<string> errors = CheckQuery(selectPart.ToLower());
+            List<string> errors;
+            errors = CheckQuery(selectPart.ToLower());
             if(errors.Count > 0)
                 return errors;
             ProcessSelectPart(selectPart.Trim()); //dekoduje część "Select ... "
             //PrintParsingResults();
-            return QueryDataGetter.GetData(testing);
+            try {
+                return QueryDataGetter.GetData(testing);
+            } catch (ArgumentException e)
+            {
+                errors = new List<string>();
+                errors.Add(e.Message);
+                return errors;
+            }
+                
         }
 
         public static List<string> CheckQuery(string query)
