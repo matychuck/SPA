@@ -55,7 +55,7 @@ namespace SPA.Calls
             return procedures;
         }
 
-        private List<Procedure> GetCalls(List<Procedure> procedures, TNODE stmtNode)
+        public List<Procedure> GetCalls(List<Procedure> procedures, TNODE stmtNode)
         {
             
 

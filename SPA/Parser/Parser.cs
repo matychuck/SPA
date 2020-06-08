@@ -864,6 +864,7 @@ namespace SPA.Parser
                 index = endIndex;
             }
             UpdateModifiesAndUsesTablesInProcedures();
+            UpdateModifiesAndUsesTablesInWhilesAndIfs();
         }
 
         public void UpdateModifiesAndUsesTablesInProcedures()
@@ -915,6 +916,43 @@ namespace SPA.Parser
                         s.UsesList = p.UsesList;
                     }
                 }
+        }
+
+        public void UpdateModifiesAndUsesTablesInWhilesAndIfs()
+        {
+            List<Statement> ifOrWhileStmts = StmtTable.StmtTable.Instance.Statements
+                .Where(i => i.AstRoot.EntityTypeEnum == EntityTypeEnum.While || i.AstRoot.EntityTypeEnum == EntityTypeEnum.If).ToList();
+
+            foreach(var stmt in ifOrWhileStmts)
+            {
+                var node = stmt.AstRoot;
+                List<TNODE> stmtLstNodes = AST.AST.Instance
+                .GetLinkedNodes(node, LinkTypeEnum.Child)
+                .Where(i => i.EntityTypeEnum == EntityTypeEnum.Stmtlist).ToList();
+
+                List<Procedure> procedures = new List<Procedure>();
+                foreach(var stmtL in stmtLstNodes)
+                {
+                    Calls.Calls.Instance.GetCalls(procedures, stmtL);
+                }
+
+                foreach(Procedure proc in procedures)
+                {
+                    foreach (KeyValuePair<int, bool> variable in proc.ModifiesList)
+                        if (!stmt.ModifiesList.ContainsKey(variable.Key))
+                        {
+                            stmt.ModifiesList[variable.Key] = true;
+                            //wasChange = true;
+                        }
+                    foreach (KeyValuePair<int, bool> variable in proc.UsesList)
+                        if (!stmt.UsesList.ContainsKey(variable.Key))
+                        {
+                            stmt.UsesList[variable.Key] = true;
+                            //wasChange = true;
+                        }
+                }
+            
+            }
         }
 
         public void CleanData()
